@@ -9,6 +9,7 @@ api = Api(app) # Envolver la app en una API
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 
+# Como una tabla de base de datos
 class VideoModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False) # nullable=False indica que el campo es obligatorio
@@ -18,6 +19,7 @@ class VideoModel(db.Model):
     def __repr__(self):
         return f"Video(nombre={nombre}, likes={likes}, views={views})"
 
+# Valida que al hacer put se envien todos los campos requeridos
 video_put_args = reqparse.RequestParser() # Objeto analizador de solicitudes 
 video_put_args.add_argument("nombre", type=str, help="Nombre del video", required=True) # required=True indica que el argumento es obligatorio
 video_put_args.add_argument("likes", type=int, help="Likes del video", required=True)
@@ -28,7 +30,7 @@ video_update_args.add_argument("nombre", type=str, help="Nombre del video")
 video_update_args.add_argument("likes", type=int, help="Likes del video")
 video_update_args.add_argument("views", type=int, help="Vistas del video")
 
-
+# Para que flask sepa cómo serializar un objeto videoModel a JSON
 resource_fields = {
     'id': fields.Integer,
     'nombre': fields.String,
@@ -37,6 +39,7 @@ resource_fields = {
 }
 
 class Video(Resource):
+    # Obtener un video
     @marshal_with(resource_fields) # Convierte el objeto VideoModel en un diccionario
     def get(self, video_id):
         result = VideoModel.query.filter_by(id=video_id).first()
@@ -44,6 +47,7 @@ class Video(Resource):
             abort(404, message="Video no encontrado")
         return result
     
+    # Crear un nuevo video
     @marshal_with(resource_fields)
     def put(self, video_id):
         args = video_put_args.parse_args()
@@ -55,10 +59,12 @@ class Video(Resource):
         db.session.commit()
         return video, 201
     
+    # Modificar un video existente
     @marshal_with(resource_fields)
     def patch(self, video_id):
         args = video_update_args.parse_args()
         result = VideoModel.query.filter_by(id=video_id).first()
+        
         if not result:
             abort(404, message="Video no encontrado")
         if args['nombre']:
@@ -70,12 +76,14 @@ class Video(Resource):
         
         db.session.commit()
         return result
-        
-
-
+    
+    # Eliminar un video
     def delete(self, video_id):
-        abort_if_video_id_doesnt_exist(video_id)
-        del videos[video_id]
+        result = VideoModel.query.filter_by(id=video_id).first()
+        if not result:
+            abort(404, message="Video no encontrado")
+        db.session.delete(result)
+        db.session.commit()
         return '', 204
 
 # Añadimos el recurso a la API
