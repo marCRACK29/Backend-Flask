@@ -1,11 +1,15 @@
-from flask import Flask
-from flask_restful import Api, Resource
+from flask_restful import Resource, reqparse
 
-names = {"1":{"peso":2.5, "dimensiones":"30x20x10", "ruta_id":1}}
 
 class EntregaResource(Resource):
-    def get(self, name):
-        return names[name]
-
     def post(self):
-        return {"data": "Posted"}
+        parser = reqparse.RequestParser() # asegura que recibo la info que necesito
+        # espero recibir los siguientes campos
+        parser.add_argument("usuario_id", type=int, required=True, help="usuario_id es requerido") #help indica lo que le envio de vuelta
+        parser.add_argument("peso", type=float, required=True, help="peso es requerido")           #si no recibo lo que necesitaba
+        parser.add_argument("dimensiones", type=str, required=True, help="dimensiones son requeridas")
+        parser.add_argument("ruta_id", type=int, required=True, help="ruta_id es requerida")
+
+        args = parser.parse_args() # lee los datos de la solicitud, crea un diccionario con los datos
+
+        return crear_entrega(args)
