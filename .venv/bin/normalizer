@@ -1,4 +1,6 @@
-#!/home/user/mi-api-rest/.venv/bin/python
+#!/bin/sh
+'''exec' "/home/marcosmartinez/Semestre_V/Diseño de Software/backend/.venv/bin/python3.13" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys
