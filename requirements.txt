@@ -13,3 +13,4 @@ MarkupSafe==3.0.2
 pytz==2025.2
 six==1.17.0
 SQLAlchemy==2.0.40
+requests==2.32.3

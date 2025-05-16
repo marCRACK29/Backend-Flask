@@ -1,10 +1,32 @@
-# Flask API Service Starter
+# Paquimóvil
 
-This is a minimal Flask API service starter based on [Google Cloud Run Quickstart](https://cloud.google.com/run/docs/quickstarts/build-and-deploy/deploy-python-service).
+### Integrantes:
 
-## Getting Started
+- Alan Ibacache
+- Braian Urra
+- Gabriel Castillo
+- Sebastián Vega
+- Marcos Martínez
 
-Server should run automatically when starting a workspace. To run manually, run:
-```sh
+### Instrucciones de uso:
+
+- Asegurarse de tener python3 instalado.
+- Activar el entorno virtual en la terminal con:
+```
+    source .venv/bin/activate
+```
+- Instalar los requerimientos con: 
+```
+    pip install -r requirements.txt
+```
+- Comprueben con: 
+```
+    python3 -m flask --version
+```
+- Ejecutar la app: 
+```
+chmod +x devserver.sh
 ./devserver.sh
 ```
+- Mostrara la url: http://127.0.0.1:5000/, pero no buscarla por el navegador, ya que da error. Lo cual es correcto, ya que no estamos haciendo nada "gráfico". 
+- Hay dos ejemplos solo para la autenticación (resources/auth.py, services/auth_service.py).
