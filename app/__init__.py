@@ -1,16 +1,29 @@
+from dotenv import load_dotenv
+load_dotenv() # para cargar el archivo .env de cada desarrollador
+
 from flask import Flask
 from flask_restful import Api
-from app.resources.auth import AuthResource
 # from app.resources.usuario import UsuarioResource
 # from app.resources.entrega import EntregaResource
 # from app.resources.localizacion import LocalizacionResource
+from flask_sqlalchemy import SQLAlchemy
+from .config import Config
+
+# Inicialización de la base de datos (SQLAlchemy)
+db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
+    app.config.from_object(Config)
+
+    # Inicializar extensiones
+    db.init_app(app)
     api = Api(app)
 
     # Rutas de la API REST
+    from app.resources.auth import AuthResource, AuthRegisterResource
     api.add_resource(AuthResource, '/api/auth/login')
+    api.add_resource(AuthRegisterResource, '/api/auth/register')
     # api.add_resource(UsuarioResource, '/api/usuarios/<int:user_id>')
     # api.add_resource(EntregaResource, '/api/entregas', '/api/entregas/mis')
     # api.add_resource(LocalizacionResource, '/api/localizacion')

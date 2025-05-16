@@ -14,3 +14,5 @@ pytz==2025.2
 six==1.17.0
 SQLAlchemy==2.0.40
 requests==2.32.3
+python-dotenv==1.1.0
+psycopg2==2.9.10
