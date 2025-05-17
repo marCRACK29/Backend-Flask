@@ -6,7 +6,7 @@ from flask import jsonify
 def crear_entrega(data):
     try:
         conn = psycopg2.connect(
-            dbname="gestion_logistica",
+            dbname="gestion_logistica",s
             user="tu_usuario",
             password="tu_password",
             host="localhost",
