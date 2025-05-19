@@ -1,6 +1,7 @@
 import os
 from app import create_app, db
 from app.models.usuario import Usuario # Importar los modelos de la base de datos
+from app.models.entrega_model import EntregaModel
 
 app = create_app() # Inicia la aplicación
 
