@@ -1,0 +1,25 @@
+from app import db
+
+class Envio(db.Model):
+    __tablename__ = 'envio'
+
+    id_envio = db.Column(db.Integer, primary_key=True)
+    # Almacena el id del usuario (su RUT)
+    receptor_id = db.Column(db.String(12), db.ForeignKey('usuario.RUT'), nullable=False)
+    remitente_id = db.Column(db.String(12), db.ForeignKey('usuario.RUT'), nullable=False)
+    # Relación con ruta: un envío tiene una sola ruta. 
+    ruta_id = db.Column(db.Integer, db.ForeignKey('ruta.id'), nullable=False)
+    # Relación con conductor: un envío tiene un solo conductor. 
+    conductor_id = db.Column(db.String(12), db.ForeignKey('usuario.RUT'), nullable=False)
+
+
+    # Receptor no siempre puede ser cliente, pero por ahora lo dejaremos así. CORREGIR
+    receptor = db.relationship('Cliente', foreign_keys=[receptor_id], backref='envios_recibidos')
+    remitente = db.relationship('Cliente', foreign_keys=[remitente_id], backref='envios_realizados')
+    # Relación uno a muchos: un envío tiene muchos paquetes
+    paquetes = db.relationship('Paquete', backref='envio', lazy=True)
+    # Relación con historial de estados
+    historial_estados = db.relationship('EstadoEnvio', back_populates='envio', lazy=True)
+    ruta_en_envio = db.relationship('Ruta', foreign_keys=[ruta_id], backref='ruta_envio')
+    conductor = db.relationship('Conductor', foreign_keys=[conductor_id], backref='envios_asignados')
+    gestiones_admin = db.relationship('AdminEnvio', back_populates='envio')
