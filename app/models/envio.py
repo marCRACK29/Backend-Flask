@@ -3,9 +3,9 @@ from app import db
 class Envio(db.Model):
     __tablename__ = 'envio'
 
-    id_envio = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     # Almacena el id del usuario (su RUT)
-    receptor_id = db.Column(db.String(12), db.ForeignKey('usuario.RUT'), nullable=False)
+    receptor_id = db.Column(db.String(12), db.ForeignKey('usuario.RUT'))
     remitente_id = db.Column(db.String(12), db.ForeignKey('usuario.RUT'), nullable=False)
     # Relación con ruta: un envío tiene una sola ruta. 
     ruta_id = db.Column(db.Integer, db.ForeignKey('ruta.id'), nullable=False)
