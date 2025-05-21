@@ -3,9 +3,9 @@ import requests
 BASE = "http://127.0.0.1:5000/"
 
 nuevo_usuario = {
-    "RUT": "21.123.123-4",
-    "nombre": "Sebastián Vega",
-    "correo": "seba@example.com",
+    "RUT": "15.123.123-0",
+    "nombre": "Marcos",
+    "correo": "marcos@example.com",
     "contraseña": "holaaa"
 }
 

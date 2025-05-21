@@ -28,6 +28,10 @@ def create_app():
     api.add_resource(EnvioResource, '/api/envios')
     api.add_resource(EnvioEstadoResource, '/api/envios/<int:envio_id>/estado')
     api.add_resource(EnviosClienteResource, '/api/envios/mis')
+    
+    from app.resources.ruta import RutaResource
+    api.add_resource(RutaResource, '/api/rutas')
+    
     # api.add_resource(LocalizacionResource, '/api/localizacion')
 
     return app
