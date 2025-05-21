@@ -1,27 +1,28 @@
 from flask_restful import Resource, reqparse
-from app.services.envio_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario
+from app.services.entrega_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario
 
 
 # Gestiona nueva envio
-class envioResource(Resource):
+class EnvioResource(Resource):
     def post(self):
         parser = reqparse.RequestParser() # asegura que recibo la info que necesito
         # espero recibir los siguientes campos
-        parser.add_argument("usuario_id", type=str, required=True, help="usuario_id es requerido") #help indica lo que le envio de vuelta
+        parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido") #help indica lo que le envio de vuelta
         parser.add_argument("conductor_id", type=str, required=True, help="conductor_id es requerido")
         parser.add_argument("ruta_id", type=int, required=True, help="ruta_id es requerida")
 
         args = parser.parse_args() # lee los datos de la solicitud, crea un diccionario con los datos
         try:
             envio=crear_envio(
-                usuario_id=args['usuario_id'], 
+                remitente_id=args['remitente_id'], 
                 ruta_id=args['ruta_id'], 
+                conductor_id=args['conductor_id']
             )
             return {
                 "mensaje": "Envío creado exitosamente",
                 "envío": {
                     "id": envio.id,
-                    "usuario id": envio.usuario_id,
+                    "usuario id": envio.remitente_id,
                     "conductor id": envio.conductor_id,
                 }
             }, 201
@@ -50,7 +51,7 @@ class EnvioEstadoResource(Resource):
         except Exception as e:
             return{"error": f"Error inesperado {str(e)}"}, 500
         
-class enviosClienteResource(Resource):
+class EnviosClienteResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
         parser.add_argument("usuario_id",type=str,required=True,location="args") #location args es que este dato viene de la url, no del body

@@ -14,12 +14,12 @@ class Envio(db.Model):
 
 
     # Receptor no siempre puede ser cliente, pero por ahora lo dejaremos así. CORREGIR
-    receptor = db.relationship('Cliente', foreign_keys=[receptor_id], backref='envios_recibidos')
-    remitente = db.relationship('Cliente', foreign_keys=[remitente_id], backref='envios_realizados')
+    receptor = db.relationship('Cliente', foreign_keys=[receptor_id], back_populates='envios_recibidos')
+    remitente = db.relationship('Cliente', foreign_keys=[remitente_id], back_populates='envios_realizados')
     # Relación uno a muchos: un envío tiene muchos paquetes
-    paquetes = db.relationship('Paquete', backref='envio', lazy=True)
+    paquetes = db.relationship('Paquete', back_populates='envio', lazy=True)
     # Relación con historial de estados
     historial_estados = db.relationship('EstadoEnvio', back_populates='envio', lazy=True)
-    ruta_en_envio = db.relationship('Ruta', foreign_keys=[ruta_id], backref='ruta_envio')
-    conductor = db.relationship('Conductor', foreign_keys=[conductor_id], backref='envios_asignados')
+    ruta_en_envio = db.relationship('Ruta', foreign_keys=[ruta_id], back_populates='ruta_envio')
+    conductor = db.relationship('Conductor', foreign_keys=[conductor_id], back_populates='envios_asignados')
     gestiones_admin = db.relationship('AdminEnvio', back_populates='envio')

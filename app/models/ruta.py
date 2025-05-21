@@ -8,4 +8,4 @@ class Ruta(db.Model):
     duracion = db.Column(db.Float, nullable=False)
 
     # Relación con envío
-    ruta_envio = db.relationship('Envio', backref='ruta_en_envio', lazy=True)
+    ruta_envio = db.relationship('Envio', back_populates='ruta_en_envio', lazy=True)

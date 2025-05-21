@@ -1,5 +1,5 @@
 from app import db
-from app.models.envio import Envio, Estado, EstadoEnvio
+from app.models import Envio, Estado, EstadoEnvio
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
@@ -16,7 +16,7 @@ def crear_envio(remitente_id, ruta_id, conductor_id):
 
 
 def actualizar_estado_envio(envio_id, nuevo_estado_id):
-    if nuevo_estado not in [1,2,3]:
+    if nuevo_estado_id not in [1,2,3]:
         raise ValueError("El estado debe ser 1 (PREPARACIÓN), 2 (TRÁNSITO) o 3 (ENTREGADO)")
     
     try:
@@ -24,7 +24,7 @@ def actualizar_estado_envio(envio_id, nuevo_estado_id):
         if not envio:
             raise LookupError(f"Envío con id {envio_id} no encontrado")
         
-        nuevo_estado = Estado.query.get(envio_id)
+        nuevo_estado = Estado.query.get(nuevo_estado_id)
         if not nuevo_estado:
             raise LookupError(f"No se encontró el estado con id {nuevo_estado_id}")
         
@@ -44,6 +44,7 @@ def actualizar_estado_envio(envio_id, nuevo_estado_id):
     
     except SQLAlchemyError as e:
         db.session.rollback()
+        print("SQLAlchemy error:", str(e))
         raise RuntimeError("Error al actualizar el estado de la base de datos") from e
     
 

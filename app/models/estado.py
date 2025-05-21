@@ -9,7 +9,7 @@ class EstadoEnum(enum.Enum):
 class Estado(db.Model):
     __tablename__ = 'estado_entrega'
 
-    id_estado = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     estado = db.Column(db.Enum(EstadoEnum), nullable=False)
 
     envios = db.relationship('EstadoEnvio', back_populates='estado')
