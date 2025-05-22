@@ -34,22 +34,22 @@ class EnvioResource(Resource):
 class EnvioEstadoResource(Resource):
     def put(self, envio_id):
         parser = reqparse.RequestParser()
-        parser.add_argument("nuevo_estado", type=int, required=True, help="nuevo_estado es requerido")
+        parser.add_argument("nuevo_estado", type=str, required=True, help="nuevo_estado es requerido")
         args = parser.parse_args()
 
         try:
-            nuevo_estado=actualizar_estado_envio(envio_id, args["nuevo_estado"])
-            return{
+            nuevo_estado = actualizar_estado_envio(envio_id, args["nuevo_estado"])
+            return {
                 "mensaje": "Estado actualizado correctamente",
                 "envio_id": envio_id,
                 "nuevo_estado": nuevo_estado
-                }, 200
+            }, 200
         except ValueError as ve:
-            return{"error":str(ve)},400
+            return {"error": str(ve)}, 400
         except LookupError as le:
-            return{"error":str(le)},404
+            return {"error": str(le)}, 404
         except Exception as e:
-            return{"error": f"Error inesperado {str(e)}"}, 500
+            return {"error": f"Error inesperado {str(e)}"}, 500
         
 class EnviosClienteResource(Resource):
     def get(self):
@@ -65,9 +65,7 @@ class EnviosClienteResource(Resource):
                 return{"mensaje": "Aun no has realizado envios"}, 200
             return [
                 {
-                    "id_envio": envio.id_envio,
-                    # con -1 accedemos al último estado
-                    # estado.estado.value accede al valor del enum
+                    "id_envio": envio.id,
                     "estado_actual": envio.historial_estados[-1].estado.estado.value if envio.historial_estados else "Sin estado",
                     "fecha_ultimo_estado": envio.historial_estados[-1].timestamp.isoformat() if envio.historial_estados else None
                 }

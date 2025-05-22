@@ -1,5 +1,6 @@
 from app import db
 from app.models import Envio, Estado, EstadoEnvio
+from app.models.estado import EstadoEnum
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
@@ -15,22 +16,38 @@ def crear_envio(remitente_id, ruta_id, conductor_id):
         raise ValueError("No se pudo crear el envío. Verifique que los datos se ingresaron correctamente.")
 
 
-def actualizar_estado_envio(envio_id, nuevo_estado_id):
-    if nuevo_estado_id not in [1,2,3]:
-        raise ValueError("El estado debe ser 1 (PREPARACIÓN), 2 (TRÁNSITO) o 3 (ENTREGADO)")
-    
+def actualizar_estado_envio(envio_id, nuevo_estado_str):
     try:
+        # Validar que el estado sea uno de los permitidos
+        try:
+            nuevo_estado_enum = EstadoEnum(nuevo_estado_str)
+        except ValueError:
+            raise ValueError(f"Estado inválido. Debe ser uno de: {[e.value for e in EstadoEnum]}")
+        
         envio = Envio.query.get(envio_id)
         if not envio:
             raise LookupError(f"Envío con id {envio_id} no encontrado")
         
-        nuevo_estado = Estado.query.get(nuevo_estado_id)
-        if not nuevo_estado:
-            raise LookupError(f"No se encontró el estado con id {nuevo_estado_id}")
+        # Obtener el estado actual
+        estado_actual = EstadoEnvio.query.filter_by(envio_id=envio_id).order_by(EstadoEnvio.timestamp.desc()).first()
+        
+        # Validar transición de estado
+        if estado_actual:
+            estado_actual_enum = estado_actual.estado.estado
+            if estado_actual_enum == EstadoEnum.ENTREGADO:
+                raise ValueError("No se puede modificar el estado de un envío ya entregado")
+            if estado_actual_enum == EstadoEnum.TRANSITO and nuevo_estado_enum == EstadoEnum.PREPARACION:
+                raise ValueError("No se puede volver a PREPARACION desde TRANSITO")
+        
+        # Buscar o crear el estado en la base de datos
+        estado_db = Estado.query.filter_by(estado=nuevo_estado_enum).first()
+        if not estado_db:
+            estado_db = Estado(estado=nuevo_estado_enum)
+            db.session.add(estado_db)
         
         nuevo_registro = EstadoEnvio(
             envio = envio,
-            estado = nuevo_estado, 
+            estado = estado_db,
             timestamp = datetime.now(timezone.utc)
         )
         db.session.add(nuevo_registro)
@@ -38,7 +55,7 @@ def actualizar_estado_envio(envio_id, nuevo_estado_id):
 
         return {
             "envio_id": envio_id,
-            "nuevo_estado": nuevo_estado.estado.value,
+            "nuevo_estado": nuevo_estado_enum.value,
             "timestamp": nuevo_registro.timestamp.isoformat()
         }
     
