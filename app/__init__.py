@@ -31,7 +31,10 @@ def create_app():
     
     from app.resources.ruta import RutaResource
     api.add_resource(RutaResource, '/api/rutas')
-    
-    # api.add_resource(LocalizacionResource, '/api/localizacion')
+
+    from app.resources.localizacion import LocalizacionResource, UltimaLocalizacionResource, HistorialLocalizacionResource
+    api.add_resource(LocalizacionResource, '/api/localizacion')
+    api.add_resource(UltimaLocalizacionResource, '/api/envios/<int:envio_id>/localizacion')
+    api.add_resource(HistorialLocalizacionResource, '/api/envios/<int:envio_id>/historial_localizacion')
 
     return app
