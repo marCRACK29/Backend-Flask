@@ -5,7 +5,7 @@ class Direccion(db.Model):
     __tablename__ = 'direcciones'
 
     id = db.Column(db.Integer, primary_key=True)
-    usuario_rut = db.Column(db.String(12), db.ForeignKey('usuarios.RUT'), nullable=False)
+    usuario_rut = db.Column(db.String(12), db.ForeignKey('usuario.RUT'), nullable=False)
     calle = db.Column(db.String(100), nullable=False)
     numero = db.Column(db.String(10), nullable=False)
     numero_departamento = db.Column(db.String(20))  # Para departamento, oficina, etc.

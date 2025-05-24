@@ -11,4 +11,4 @@ class Paquete(db.Model):
     descripcion = db.Column(db.Text)
     envio_id = db.Column(db.Integer, db.ForeignKey('envio.id'), nullable=False)
     
-    envio = db.relationship('Envio', foreign_keys=[envio_id])
+    envio = db.relationship('Envio', back_populates='paquetes', foreign_keys=[envio_id])

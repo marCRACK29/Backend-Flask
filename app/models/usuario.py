@@ -18,6 +18,12 @@ class Usuario(db.Model):
     fecha_creacion = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
 
+    # Relaciones con Envio
+    envios_recibidos = db.relationship('Envio', foreign_keys='Envio.receptor_id',back_populates='receptor', lazy=True)
+    envios_realizados = db.relationship('Envio', foreign_keys='Envio.remitente_id',back_populates='remitente', lazy=True)
+    envios_asignados = db.relationship('Envio', foreign_keys='Envio.conductor_id',back_populates='conductor', lazy=True)
+
+
 # Entidades hijas
 class Cliente(Usuario):
     __tablename__ = 'cliente'
@@ -33,10 +39,6 @@ class Cliente(Usuario):
         'polymorphic_identity': 'cliente',
     }
 
-    # Relaciones con Envio
-    envios_recibidos = db.relationship('Envio', foreign_keys="[Envio.receptor_id]",back_populates='receptor', lazy=True)
-    envios_realizados = db.relationship('Envio', foreign_keys="[Envio.remitente_id]",back_populates='remitente', lazy=True)
-
 class Conductor(Usuario):
     __tablename__ = 'conductor'
 
@@ -45,8 +47,7 @@ class Conductor(Usuario):
     __mapper_args__ = {
         'polymorphic_identity': 'conductor',
     }
-    # Relacion con envío 
-    envios_asignados = db.relationship('Envio', foreign_keys="[Envio.conductor_id]",back_populates='conductor')
+
     #Relación con admin: admin asigna un conductor
     asignaciones_admin = db.relationship('AdminConductor', back_populates='conductor_asignado')
 
