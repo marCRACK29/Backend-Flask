@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from app.services.entrega_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario
+from app.services.envio_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor
 
 
 # Gestiona nueva envio
@@ -68,6 +68,37 @@ class EnviosClienteResource(Resource):
                     "id_envio": envio.id,
                     "estado_actual": envio.historial_estados[-1].estado.estado.value if envio.historial_estados else "Sin estado",
                     "fecha_ultimo_estado": envio.historial_estados[-1].timestamp.isoformat() if envio.historial_estados else None
+                }
+                for envio in envios
+            ], 200
+        except ValueError as ve:
+            return {"error": str(ve)}, 400
+        except RuntimeError as re:
+            return {"error": str(re)}, 500
+        except Exception as e:
+            return {"error": f"Error inesperado: {str(e)}"}, 500
+
+class EnviosConductorResource(Resource):
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("conductor_id", type=str, required=True, location="args")
+        args = parser.parse_args()
+
+        try:
+            conductor_id = args["conductor_id"]
+            envios = obtener_envios_por_conductor(conductor_id)
+
+            if envios is None:
+                return {"mensaje": "No tienes envíos asignados"}, 200
+                
+            return [
+                {
+                    "id_envio": envio.id,
+                    "estado_actual": envio.historial_estados[-1].estado.estado.value if envio.historial_estados else "Sin estado",
+                    "fecha_ultimo_estado": envio.historial_estados[-1].timestamp.isoformat() if envio.historial_estados else None,
+                    "remitente": envio.remitente_id,
+                    "receptor": envio.receptor_id,
+                    "ruta_id": envio.ruta_id
                 }
                 for envio in envios
             ], 200

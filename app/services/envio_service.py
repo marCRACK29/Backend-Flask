@@ -80,5 +80,21 @@ def obtener_envios_por_usuario(rut_usuario):
     except Exception as e:
         raise RuntimeError(f"Ocurrió un error al consultar los envíos: {str(e)}")
 
+def obtener_envios_por_conductor(conductor_id):
+    """
+    Obtiene todos los envíos asignados a un conductor específico.
+    
+    Args:
+        conductor_id (str): RUT del conductor
+        
+    Returns:
+        list: Lista de envíos asignados al conductor
+    """
+    envios = Envio.query.filter_by(conductor_id=conductor_id).all()
+    if not envios:
+        return None
+        
+    return envios
+
         
     

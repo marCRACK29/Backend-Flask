@@ -3,9 +3,9 @@ import requests
 BASE = "http://127.0.0.1:5000/"
 
 nuevo_envio = {
-    "remitente_id" : "21.123.123-4",
+    "remitente_id" : "15.123.123-4",
     "ruta_id" : 5,
-    "conductor_id": "15.123.123-0"
+    "conductor_id": "15.123.123-5"
 }
 
 response = requests.post(BASE + "api/envios", json=nuevo_envio)

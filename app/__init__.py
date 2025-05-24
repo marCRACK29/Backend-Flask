@@ -24,10 +24,11 @@ def create_app():
     api.add_resource(AuthRegisterResource, '/api/auth/register')
     # api.add_resource(UsuarioResource, '/api/usuarios/<int:user_id>')
     
-    from app.resources.entrega import EnvioResource, EnvioEstadoResource, EnviosClienteResource
+    from app.resources.envio_resources import EnvioResource, EnvioEstadoResource, EnviosClienteResource, EnviosConductorResource
     api.add_resource(EnvioResource, '/api/envios')
     api.add_resource(EnvioEstadoResource, '/api/envios/<int:envio_id>/estado')
     api.add_resource(EnviosClienteResource, '/api/envios/mis')
+    api.add_resource(EnviosConductorResource, '/api/envios/conductor')
     
     from app.resources.ruta import RutaResource
     api.add_resource(RutaResource, '/api/rutas')
@@ -36,5 +37,9 @@ def create_app():
     api.add_resource(LocalizacionResource, '/api/localizacion')
     api.add_resource(UltimaLocalizacionResource, '/api/envios/<int:envio_id>/localizacion')
     api.add_resource(HistorialLocalizacionResource, '/api/envios/<int:envio_id>/historial_localizacion')
+
+    from app.resources.conductor import ConductorEnvioResource, ConductorActualizarEstadoResource
+    api.add_resource(ConductorEnvioResource, '/api/conductor/envios/en-curso')
+    api.add_resource(ConductorActualizarEstadoResource, '/api/conductor/envios/<int:envio_id>/estado')
 
     return app
