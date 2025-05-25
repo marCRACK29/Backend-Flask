@@ -1,11 +1,9 @@
 from app import db
-from app.models.usuario import Usuario, Cliente, Conductor, Admin
+from app.models import Cliente, Conductor, Admin
 from werkzeug.security import generate_password_hash
 from sqlalchemy.exc import IntegrityError
 import requests
-from sqlalchemy import inspect
 
-# ESTE ES SOLO UN EJEMPLO
 def login_usuario(email, password):
     response = requests.post('http://servicio-auth:5000/login', json={
         'email': email,
@@ -13,64 +11,84 @@ def login_usuario(email, password):
     })
     return response.json(), response.status_code
 
-
-def registrar_usuario(RUT, nombre, correo, contraseña, tipo_usuario, numero_domicilio=None, calle=None, ciudad=None, region=None, codigo_postal=None):
-
-    print("Base de datos conectada a:", db.engine.url)
-    print("Tablas disponibles:", inspect(db.engine).get_table_names())
-    print("Usuarios en la base actualmente:")
-    print([u.correo for u in Usuario.query.all()])
-
-    if Usuario.query.filter_by(correo=correo).first():
+def registrar_conductor(RUT, nombre, correo, contraseña):
+    # Validar que no exista el usuario
+    if Conductor.query.filter_by(correo=correo).first():
         raise ValueError("El correo ya esta registrado.")
-    if Usuario.query.get(RUT):
+    if Conductor.query.get(RUT):
         raise ValueError("El RUT ya esta registrado.")
     
     c_hash = generate_password_hash(contraseña)
     
-    if tipo_usuario == "cliente":
-        nuevo_usuario = Cliente(
-            RUT=RUT,
-            nombre=nombre,
-            correo=correo,
-            contraseña=c_hash,
-            tipo_usuario=tipo_usuario,
-            numero_domicilio=numero_domicilio,
-            calle=calle,
-            ciudad=ciudad,
-            region=region,
-            codigo_postal=codigo_postal
-        )
-    elif tipo_usuario == "conductor":
-        nuevo_usuario = Conductor(
-            RUT=RUT,
-            nombre=nombre,
-            correo=correo,
-            contraseña=c_hash,
-            tipo_usuario=tipo_usuario
-        )
-    elif tipo_usuario == "admin":
-        nuevo_usuario = Admin(
-            RUT=RUT,
-            nombre=nombre,
-            correo=correo,
-            contraseña=c_hash,
-            tipo_usuario=tipo_usuario
-        )
-    else:
-        nuevo_usuario = Usuario(
-            RUT=RUT,
-            nombre=nombre,
-            correo=correo,
-            contraseña=c_hash,
-            tipo_usuario=tipo_usuario
-        )
+    nuevo_conductor = Conductor(
+        RUT=RUT,
+        nombre=nombre,
+        correo=correo,
+        contraseña=c_hash
+    )
+    
+    try: 
+        db.session.add(nuevo_conductor)
+        db.session.commit()
+        return nuevo_conductor    
+    
+    except IntegrityError as e:
+        db.session.rollback()
+        print("ERROR DE INTEGRIDAD:", str(e))
+        raise ValueError("No se pudo registrar el usuario. Verifica que RUT o correo no estén duplicados.")
+
+def registrar_admin(RUT, nombre, correo, contraseña):
+    # Validar que no exista el usuario
+    if Admin.query.filter_by(correo=correo).first():
+        raise ValueError("El correo ya esta registrado.")
+    if Admin.query.get(RUT):
+        raise ValueError("El RUT ya esta registrado.")
+    
+    c_hash = generate_password_hash(contraseña)
+    
+    nuevo_admin = Admin(
+        RUT=RUT,
+        nombre=nombre,
+        correo=correo,
+        contraseña=c_hash
+    )
+    
+    try: 
+        db.session.add(nuevo_admin)
+        db.session.commit()
+        return nuevo_admin    
+    
+    except IntegrityError as e:
+        db.session.rollback()
+        print("ERROR DE INTEGRIDAD:", str(e))
+        raise ValueError("No se pudo registrar el usuario. Verifica que RUT o correo no estén duplicados.")
+
+def registrar_cliente(RUT, nombre, correo, contraseña, numero_domicilio, calle, ciudad, region, codigo_postal):
+    # Validar que no exista el usuario
+    if Cliente.query.filter_by(correo=correo).first():
+        raise ValueError("El correo ya esta registrado.")
+    if Cliente.query.get(RUT):
+        raise ValueError("El RUT ya esta registrado.")
+    
+    c_hash = generate_password_hash(contraseña)
+
+    nuevo_cliente = Cliente(
+        RUT=RUT,
+        nombre=nombre,
+        correo=correo,
+        contraseña=c_hash,
+        numero_domicilio=numero_domicilio,
+        calle=calle,
+        ciudad=ciudad,
+        region=region,
+        codigo_postal=codigo_postal
+    )
 
     try: 
-        print("Intentando registrar:", nuevo_usuario)
-        db.session.add(nuevo_usuario)
+        db.session.add(nuevo_cliente)
         db.session.commit()
-        return nuevo_usuario
+        return nuevo_cliente
+        
     except IntegrityError as e:
         db.session.rollback()
         print("ERROR DE INTEGRIDAD:", str(e))

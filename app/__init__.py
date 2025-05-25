@@ -4,10 +4,12 @@ load_dotenv() # para cargar el archivo .env de cada desarrollador
 from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from .config import Config
 
 # Inicialización de la base de datos (SQLAlchemy)
 db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
@@ -15,14 +17,15 @@ def create_app():
 
     # Inicializar extensiones
     db.init_app(app)
+    migrate.init_app(app, db)
     api = Api(app)
 
     # Importar recursos aca para evitar importaciones circulares.
-    from app.resources.auth import AuthResource, AuthRegisterResource
-    # Rutas de la API REST
+    from app.resources.auth import AuthResource, AuthRegisterClienteResource, AuthRegisterAdminResource, AuthRegisterConductorResource
     api.add_resource(AuthResource, '/api/auth/login')
-    api.add_resource(AuthRegisterResource, '/api/auth/register')
-    # api.add_resource(UsuarioResource, '/api/usuarios/<int:user_id>')
+    api.add_resource(AuthRegisterClienteResource, '/api/auth/register/cliente')
+    api.add_resource(AuthRegisterConductorResource, '/api/auth/register/conductor')
+    api.add_resource(AuthRegisterAdminResource, '/api/auth/register/admin')
     
     from app.resources.envio_resources import EnvioResource, EnvioEstadoResource, EnviosClienteResource, EnviosConductorResource
     api.add_resource(EnvioResource, '/api/envios')
