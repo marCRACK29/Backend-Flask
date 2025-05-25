@@ -1,6 +1,8 @@
 import requests
-
-BASE = "http://127.0.0.1:5000/"
+import os
+from dotenv import load_dotenv
+load_dotenv()
+BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:5000/")
 
 # ID del envío a modificar
 envio_id = 7
