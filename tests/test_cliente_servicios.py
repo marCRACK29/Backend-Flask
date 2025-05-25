@@ -5,13 +5,13 @@ BASE = "http://127.0.0.1:5000/"
 # Datos de prueba
 cliente_rut = "21.595.999-3"
 nueva_direccion = {
-    "calle": "Avenida Principal",
-    "numero_domicilio": 123,
-    "ciudad": "Santiago",
+    "calle": "calle verdadera",
+    "numero_domicilio": 666,
+    "ciudad": "conce",
     "region": "Metropolitana",
     "codigo_postal": 1234567
 }
-nuevo_correo = "topo@ejemplo.com"
+nuevo_correo = "rodolfo@ejemplo.com"
 
 print("=== Test de Servicios de Cliente ===")
 
