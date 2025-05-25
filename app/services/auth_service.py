@@ -67,6 +67,7 @@ def registrar_usuario(RUT, nombre, correo, contraseña, tipo_usuario, numero_dom
         )
 
     try: 
+        print("Intentando registrar:", nuevo_usuario)
         db.session.add(nuevo_usuario)
         db.session.commit()
         return nuevo_usuario

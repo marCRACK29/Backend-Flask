@@ -1,6 +1,10 @@
 import os
+from dotenv import load_dotenv
 from app import create_app, db
 from app.models import * # Importar los modelos de la base de datos
+
+# cargar las variables de .env
+load_dotenv()
 
 app = create_app() # Inicia la aplicación
 
