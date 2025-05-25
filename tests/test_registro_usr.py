@@ -3,16 +3,16 @@ import requests
 BASE = "http://127.0.0.1:5000/"
 
 nuevo_cliente = {
-    "RUT": "15.123.123-4",
-    "nombre": "Cliente Ejemplo",
-    "correo": "cliente@example.com",
+    "RUT": "21.595.999-3",
+    "nombre": "juanito",
+    "correo": "juan@example.com",
     "contraseña": "holacliente",
     "tipo_usuario": "cliente",
-    "numero_domicilio": 123,
-    "calle": "Calle Falsa",
+    "numero_domicilio": 444,
+    "calle": "Calle Verdadera",
     "ciudad": "Santiago",
     "region": "RM",
-    "codigo_postal": 12345
+    "codigo_postal": 1234888
 }
 
 nuevo_conductor = {
