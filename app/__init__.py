@@ -6,7 +6,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from .config import Config
-from flask import CORS
+from flask_cors import CORS
 
 # Inicialización de la base de datos (SQLAlchemy)
 db = SQLAlchemy()
@@ -51,5 +51,9 @@ def create_app():
     api.add_resource(ClienteDireccionResource, '/api/cliente/direccion')
     api.add_resource(ClienteCorreoResource, '/api/cliente/correo')
     api.add_resource(ClienteEnviosResource, '/api/cliente/envios')
+
+    # Test simple para testear conexión entre frontend y backend
+    from app.resources.test_resource import TestConnectionResource
+    api.add_resource(TestConnectionResource, '/api/test')
 
     return app
