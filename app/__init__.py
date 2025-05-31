@@ -6,6 +6,7 @@ from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from .config import Config
+from flask import CORS
 
 # Inicialización de la base de datos (SQLAlchemy)
 db = SQLAlchemy()
@@ -16,6 +17,7 @@ def create_app():
     app.config.from_object(Config)
 
     # Inicializar extensiones
+    CORS(app)
     db.init_app(app)
     migrate.init_app(app, db)
     api = Api(app)

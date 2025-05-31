@@ -12,4 +12,8 @@ app = create_app()
 if __name__ == '__main__':
     # Configurar debug desde variables de entorno
     debug = os.getenv("FLASK_DEBUG", "true").lower() == "true"
-    app.run(debug=debug)
+    # Obtener host y puerto desde variables de entorno o por defecto
+    host = os.getenv("FLASK_RUN_HOST", "0.0.0.0")  # Acepta conexiones externas (requerido por ngrok)
+    port = int(os.getenv("FLASK_RUN_PORT", 5000))  # Puerto por defecto de Flask
+
+    app.run(debug=debug, host=host, port=port)
