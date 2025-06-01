@@ -1,5 +1,5 @@
 from app import db
-from app.models import Envio, Estado, EstadoEnvio
+from app.models import Envio, Estado, EstadoEnvio, Paquete
 from app.models.estado import EstadoEnum
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -14,6 +14,38 @@ def crear_envio(remitente_id, ruta_id, conductor_id):
         return nuevo_envio
     except IntegrityError:
         raise ValueError("No se pudo crear el envío. Verifique que los datos se ingresaron correctamente.")
+
+
+def crear_envio_con_paquetes(data):
+    envio = Envio(
+        remitente_id=data["remitente_id"],
+        ruta_id=data["ruta_id"],
+        conductor_id=data["conductor_id"]
+    )
+
+    paquetes_data = data.get("paquetes", [])
+    if not paquetes_data:
+        raise ValueError("Debes proporcionar al menos un paquete")
+
+    for paquete_info in paquetes_data:
+        paquete = Paquete(
+            peso=paquete_info["peso"],
+            alto=paquete_info.get("alto"),
+            largo=paquete_info.get("largo"),
+            ancho=paquete_info.get("ancho"),
+            descripcion=paquete_info.get("descripcion"),
+            envio=envio  # Se vincula el paquete con el envío
+        )
+        db.session.add(paquete)
+
+    try:
+        db.session.add(envio)
+        db.session.commit()
+        return envio
+    except IntegrityError:
+        db.session.rollback()
+        raise ValueError("No se pudo crear el envío. Verifica los datos ingresados.")
+
 
 
 def actualizar_estado_envio(envio_id, nuevo_estado_str):

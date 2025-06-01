@@ -1,5 +1,5 @@
-from flask_restful import Resource, reqparse
-from app.services.envio_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor
+from flask_restful import Resource, reqparse, request
+from app.services.envio_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor, crear_envio_con_paquetes
 
 
 # Gestiona nueva envio
@@ -28,7 +28,35 @@ class EnvioResource(Resource):
             }, 201
         except Exception as e:
             return {"error": str(e)}, 400
+        
 
+class EnvioPaquetesResource(Resource):
+    def post(self):
+        data = request.get_json()
+
+        try:
+            envio = crear_envio_con_paquetes(data)
+            return {
+                "mensaje": "Envío creado exitosamente",
+                "envio": {
+                    "id": envio.id,
+                    "remitente_id": envio.remitente_id,
+                    "conductor_id": envio.conductor_id,
+                    "paquetes": [
+                        {
+                            "id": p.id,
+                            "peso": p.peso,
+                            "alto": p.alto,
+                            "largo": p.largo,
+                            "ancho": p.ancho,
+                            "descripcion": p.descripcion
+                        }
+                        for p in envio.paquetes
+                    ]
+                }
+            }, 201
+        except Exception as e:
+            return {"error": str(e)}, 400
 
 # Gestiona cambio estado envio
 class EnvioEstadoResource(Resource):
@@ -63,14 +91,40 @@ class EnviosClienteResource(Resource):
 
             if envios is None:
                 return{"mensaje": "Aun no has realizado envios"}, 200
-            return [
-                {
+            
+            resultado = []
+
+            for envio in envios:
+                paquetes = [
+                    {
+                        "id": paquete.id,
+                        "peso": paquete.peso,
+                        "alto": paquete.alto,
+                        "largo": paquete.largo,
+                        "ancho": paquete.ancho,
+                        "descripcion": paquete.descripcion
+                    }
+                    for paquete in envio.paquetes
+                ]
+
+                estado_actual = (
+                    envio.historial_estados[-1].estado.estado.value
+                    if envio.historial_estados else "Sin estado"
+                )
+
+                fecha_estado = (
+                    envio.historial_estados[-1].timestamp.isoformat()
+                    if envio.historial_estados else None
+                )
+
+                resultado.append({
                     "id_envio": envio.id,
-                    "estado_actual": envio.historial_estados[-1].estado.estado.value if envio.historial_estados else "Sin estado",
-                    "fecha_ultimo_estado": envio.historial_estados[-1].timestamp.isoformat() if envio.historial_estados else None
-                }
-                for envio in envios
-            ], 200
+                    "estado_actual": estado_actual,
+                    "fecha_ultimo_estado": fecha_estado,
+                    "paquetes": paquetes
+                })
+            return resultado, 200
+        
         except ValueError as ve:
             return {"error": str(ve)}, 400
         except RuntimeError as re:
