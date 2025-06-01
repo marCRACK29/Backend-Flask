@@ -23,4 +23,4 @@ class Envio(db.Model):
     ruta_en_envio = db.relationship('Ruta', foreign_keys=[ruta_id], back_populates='ruta_envio')
     conductor = db.relationship('Conductor', foreign_keys=[conductor_id], back_populates='envios_asignados')
     gestiones_admin = db.relationship('AdminEnvio', back_populates='envio')
-    localizaciones = db.relationship('Localizacion', backref='envio', lazy=True)
+    

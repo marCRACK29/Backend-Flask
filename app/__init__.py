@@ -5,12 +5,14 @@ from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from .config import Config
 from flask_cors import CORS
+from flask_socketio import SocketIO
+from .config import Config
 
-# Inicialización de la base de datos (SQLAlchemy)
+# Inicialización de extensiones
 db = SQLAlchemy()
 migrate = Migrate()
+socketio = SocketIO(cors_allowed_origins="*", async_mode='eventlet')
 
 def create_app():
     app = Flask(__name__)
@@ -20,6 +22,7 @@ def create_app():
     CORS(app)
     db.init_app(app)
     migrate.init_app(app, db)
+    socketio.init_app(app)
     api = Api(app)
 
     # Importar recursos aca para evitar importaciones circulares.

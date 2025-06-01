@@ -12,3 +12,4 @@ class Conductor(db.Model):
 
     envios_asignados = db.relationship('Envio', foreign_keys='Envio.conductor_id', back_populates='conductor', lazy=True)
     asignaciones_admin = db.relationship('AdminConductor', foreign_keys='AdminConductor.conductor_id', back_populates='conductor_asignado')
+    localizacion = db.relationship('Localizacion', backref='conductor', lazy=True)
