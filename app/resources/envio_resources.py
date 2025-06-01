@@ -7,16 +7,20 @@ class EnvioResource(Resource):
     def post(self):
         parser = reqparse.RequestParser() # asegura que recibo la info que necesito
         # espero recibir los siguientes campos
-        parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido") #help indica lo que le envio de vuelta
+        parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido")
         parser.add_argument("conductor_id", type=str, required=True, help="conductor_id es requerido")
         parser.add_argument("ruta_id", type=int, required=True, help="ruta_id es requerida")
+        parser.add_argument("direccion_origen", type=str, required=True, help="direccion_origen es requerida")
+        parser.add_argument("direccion_destino", type=str, required=True, help="direccion_destino es requerida")
 
-        args = parser.parse_args() # lee los datos de la solicitud, crea un diccionario con los datos
+        args = parser.parse_args()
         try:
-            envio=crear_envio(
+            envio = crear_envio(
                 remitente_id=args['remitente_id'], 
                 ruta_id=args['ruta_id'], 
-                conductor_id=args['conductor_id']
+                conductor_id=args['conductor_id'],
+                direccion_origen=args['direccion_origen'],
+                direccion_destino=args['direccion_destino']
             )
             return {
                 "mensaje": "Envío creado exitosamente",
@@ -24,6 +28,8 @@ class EnvioResource(Resource):
                     "id": envio.id,
                     "usuario id": envio.remitente_id,
                     "conductor id": envio.conductor_id,
+                    "direccion origen": envio.direccion_origen,
+                    "direccion destino": envio.direccion_destino
                 }
             }, 201
         except Exception as e:

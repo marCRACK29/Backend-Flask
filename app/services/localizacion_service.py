@@ -1,9 +1,9 @@
 from app import db
 from app.models import Localizacion
 
-def registrar_localizacion(envio_id, latitud, longitud):
+def registrar_localizacion(conductor_id, latitud, longitud):
     nueva_localizacion = Localizacion(
-        envio_id=envio_id,
+        conductor_id=conductor_id,
         latitud=latitud,
         longitud=longitud
     )
@@ -11,8 +11,8 @@ def registrar_localizacion(envio_id, latitud, longitud):
     db.session.commit()
     return nueva_localizacion
 
-def obtener_ultima_localizacion(envio_id):
-    return Localizacion.query.filter_by(envio_id=envio_id).order_by(Localizacion.timestamp.desc()).first()
+def obtener_ultima_localizacion(conductor_id):
+    return Localizacion.query.filter_by(conductor_id=conductor_id).order_by(Localizacion.timestamp.desc()).first()
 
-def obtener_historial_localizaciones(envio_id):
-    return Localizacion.query.filter_by(envio_id=envio_id).order_by(Localizacion.timestamp.asc()).all()
+def obtener_historial_localizaciones(conductor_id):
+    return Localizacion.query.filter_by(conductor_id=conductor_id).order_by(Localizacion.timestamp.asc()).all()

@@ -16,24 +16,28 @@ def handle_disconnect():
 
 @socketio.on('join_tracking')
 def handle_join_tracking(data):
-    """Cliente se une al tracking de un envío específico"""
+    print(f'🔵 Evento join_tracking recibido: {data}')
+    
     envio_id = data.get('envio_id')
-    user_type = data.get('user_type')  # 'cliente' o 'conductor'
+    user_type = data.get('user_type')
     user_id = data.get('user_id')
     
-    # Verificar que el usuario tiene permisos para trackear este envío
     if verificar_permiso_seguimiento(envio_id, user_id, user_type):
+        print(f'✅ Permiso concedido para seguimiento del envío {envio_id} por {user_type} {user_id}')
         join_room(f'envio_{envio_id}')
+
+        estado_actual = get_envio_status(envio_id)
+        print(f'📤 Enviando estado actual: {estado_actual}')  # Asegúrate de que no sea None
+
         emit('joined_tracking', {
             'envio_id': envio_id,
             'message': f'Te has unido al tracking del envío {envio_id}'
         })
-        
-        # Enviar estado actual del envío
-        estado_actual = get_envio_status(envio_id)
+
         emit('status_update', estado_actual, room=f'envio_{envio_id}')
     else:
-        emit('error', {'message': 'No tienes permisos para get_active_envios_bytrackear este envío'})
+        print(f'❌ Permiso denegado para {user_type} {user_id} en envío {envio_id}')
+        emit('error', {'message': 'No tienes permisos para trackear este envío'})
 
 @socketio.on('leave_tracking')
 def handle_leave_tracking(data):
@@ -46,12 +50,12 @@ def handle_leave_tracking(data):
 def handle_location_update(data):
     """Conductor actualiza su ubicación"""
     conductor_id = data.get('conductor_id')
-    latitud = data.get('latitud')
-    longitud = data.get('longitud')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
     timestamp = datetime.now()
     
     # Actualizar ubicación en base de datos
-    actualizar_ubicacion_conductor(conductor_id, latitud, longitud, timestamp)
+    actualizar_ubicacion_conductor(conductor_id, latitude, longitude, timestamp)
     
     # Obtener envíos activos del conductor
     envios_activos = get_envios_activos_by_conductor(conductor_id)
@@ -61,8 +65,8 @@ def handle_location_update(data):
         socketio.emit('location_update', {
             'envio_id': envio['id'],
             'conductor_id': conductor_id,
-            'latitud': latitud,
-            'longitud': longitud,
+            'latitude': latitude,
+            'longitude': longitude,
             'timestamp': timestamp.isoformat()
         }, room=f'envio_{envio["id"]}')
 
@@ -87,32 +91,39 @@ def get_envio_status(envio_id):
 
     conductor = Conductor.query.get(envio.conductor_id)
     cliente = Cliente.query.get(envio.remitente_id)
-    ubicacion = Localizacion.query.filter_by(conductor_id=envio.conductor_id).order_by(Localizacion.updated_at.desc()).first()
+    ubicacion = Localizacion.query.filter_by(conductor_id=envio.conductor_id).order_by(Localizacion.timestamp.desc()).first()
+    
+    ultimo_estado = (
+        sorted(envio.historial_estados, key=lambda e: e.timestamp, reverse=True)[0]
+        if envio.historial_estados else None
+    )
 
     return {
         'envio_id': envio.id,
-        'estado': envio.historial_estados,
+        'estado': ultimo_estado.estado.estado.value if ultimo_estado else None,
+        'direccion_origen': getattr(envio, 'direccion_origen', None),  # Solo si tienes estos campos en el modelo
+        'direccion_destino': getattr(envio, 'direccion_destino', None),
         'conductor_nombre': conductor.nombre if conductor else None,
         'cliente_nombre': cliente.nombre if cliente else None,
-        'latitud': ubicacion.latitud if ubicacion else None,
-        'longitud': ubicacion.longitud if ubicacion else None,
+        'latitude': ubicacion.latitude if ubicacion else None,
+        'longitude': ubicacion.longitude if ubicacion else None,
         'last_location_update': ubicacion.updated_at.isoformat() if ubicacion else None
     }
 
-def actualizar_ubicacion_conductor(conductor_id, latitud, longitud, timestamp):
+def actualizar_ubicacion_conductor(conductor_id, latitude, longitude, timestamp):
     """Actualizar ubicación del conductor en la base de datos"""
     ubicacion = Localizacion.query.filter_by(conductor_id=conductor_id).first()
     if not ubicacion:
         ubicacion = Localizacion(
             conductor_id=conductor_id,
-            latitud=latitud,
-            longitud=longitud,
+            latitude=latitude,
+            longitude=longitude,
             timestamp=timestamp
         )
         db.session.add(ubicacion)
     else:
-        ubicacion.latitud = latitud
-        ubicacion.longitud = longitud
+        ubicacion.latitude = latitude
+        ubicacion.longitude = longitude
         ubicacion.timestamp = timestamp
 
     db.session.commit()

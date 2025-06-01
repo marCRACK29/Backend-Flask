@@ -11,7 +11,8 @@ class Envio(db.Model):
     ruta_id = db.Column(db.Integer, db.ForeignKey('ruta.id'), nullable=False)
     # Relación con conductor: un envío tiene un solo conductor. 
     conductor_id = db.Column(db.String(12), db.ForeignKey('conductor.RUT'), nullable=False)
-
+    direccion_origen = db.Column(db.String(255))
+    direccion_destino = db.Column(db.String(255))
 
     # Receptor no siempre puede ser cliente, pero por ahora lo dejaremos así. CORREGIR
     receptor = db.relationship('Cliente', foreign_keys=[receptor_id], back_populates='envios_recibidos')

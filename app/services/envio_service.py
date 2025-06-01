@@ -5,8 +5,14 @@ from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 # No existe un remitente aún al crear un envío
-def crear_envio(remitente_id, ruta_id, conductor_id): 
-    nuevo_envio = Envio(remitente_id=remitente_id, ruta_id=ruta_id, conductor_id=conductor_id)
+def crear_envio(remitente_id, ruta_id, conductor_id, direccion_origen, direccion_destino): 
+    nuevo_envio = Envio(
+        remitente_id=remitente_id, 
+        ruta_id=ruta_id, 
+        conductor_id=conductor_id,
+        direccion_origen=direccion_origen,
+        direccion_destino=direccion_destino
+    )
 
     try:
         db.session.add(nuevo_envio)
