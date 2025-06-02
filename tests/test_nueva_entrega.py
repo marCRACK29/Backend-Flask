@@ -4,14 +4,17 @@ from dotenv import load_dotenv
 load_dotenv()
 BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:5000/")
 
+# Datos de prueba con IDs que existen en la base de datos
 nuevo_envio = {
-    "remitente_id" : "21.595.999-3",
-    "ruta_id" : 5,
-    "conductor_id": "15.123.123-5"
+    "remitente_id": "21.595.452-3",  # ID de un cliente que existe
+    "ruta_id": 1,                    # ID de una ruta que existe
+    "conductor_id": "15.123.102-4",  # ID de un conductor que existe
+    "direccion_origen": "Chillán",
+    "direccion_destino": "Concepción"
 }
 
+print("Enviando datos:", nuevo_envio)
 response = requests.post(BASE + "api/envios", json=nuevo_envio)
-
 print("Status code:", response.status_code)
 
 try:

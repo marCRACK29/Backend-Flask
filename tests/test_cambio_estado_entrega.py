@@ -5,11 +5,11 @@ load_dotenv()
 BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:5000/")
 
 # ID del envío a modificar
-envio_id = 7
+envio_id = 3
 
 # Cambiar el estado a "En tránsito"
 payload = {
-    "nuevo_estado": "En transito"  # Usando el valor directamente
+    "nuevo_estado": "En preparación"  # Usando el valor directamente
 }
 
 # Realizar la petición
