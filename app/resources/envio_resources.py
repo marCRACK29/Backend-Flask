@@ -1,34 +1,36 @@
 from flask_restful import Resource, reqparse, request
-from app.services.envio_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor, crear_envio_con_paquetes
+from app.services.envio_service import actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor, crear_envio_con_paquetes, asignar_conductor_a_envio, asignar_ruta_a_envio
 
 
 # Gestiona nueva envio
-class EnvioResource(Resource):
-    def post(self):
-        parser = reqparse.RequestParser() # asegura que recibo la info que necesito
-        # espero recibir los siguientes campos
-        parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido") #help indica lo que le envio de vuelta
-        parser.add_argument("conductor_id", type=str, required=True, help="conductor_id es requerido")
-        parser.add_argument("ruta_id", type=int, required=True, help="ruta_id es requerida")
+# class EnvioResource(Resource):
+#     def post(self):
+#         parser = reqparse.RequestParser() # asegura que recibo la info que necesito
+#         # espero recibir los siguientes campos
+#         parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido") #help indica lo que le envio de vuelta
+#         parser.add_argument("conductor_id", type=str, required=True, help="conductor_id es requerido")
+#         parser.add_argument("ruta_id", type=int, required=True, help="ruta_id es requerida")
 
-        args = parser.parse_args() # lee los datos de la solicitud, crea un diccionario con los datos
-        try:
-            envio=crear_envio(
-                remitente_id=args['remitente_id'], 
-                ruta_id=args['ruta_id'], 
-                conductor_id=args['conductor_id']
-            )
-            return {
-                "mensaje": "Envío creado exitosamente",
-                "envío": {
-                    "id": envio.id,
-                    "usuario id": envio.remitente_id,
-                    "conductor id": envio.conductor_id,
-                }
-            }, 201
-        except Exception as e:
-            return {"error": str(e)}, 400
+#         args = parser.parse_args() # lee los datos de la solicitud, crea un diccionario con los datos
+#         try:
+#             envio=crear_envio(
+#                 remitente_id=args['remitente_id'], 
+#                 ruta_id=args['ruta_id'], 
+#                 conductor_id=args['conductor_id']
+#             )
+#             return {
+#                 "mensaje": "Envío creado exitosamente",
+#                 "envío": {
+#                     "id": envio.id,
+#                     "usuario id": envio.remitente_id,
+#                     "conductor id": envio.conductor_id,
+#                 }
+#             }, 201
+#         except Exception as e:
+#             return {"error": str(e)}, 400
         
+
+
 
 class EnvioPaquetesResource(Resource):
     def post(self):
@@ -163,3 +165,31 @@ class EnviosConductorResource(Resource):
         except Exception as e:
             return {"error": f"Error inesperado: {str(e)}"}, 500
 
+
+class AsignarConductorResource(Resource):
+    def put(self, envio_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("rut_conductor", type=str, required=True, help="El RUT del conductor es obligatorio.")
+        args = parser.parse_args()
+
+        try:
+            envio = asignar_conductor_a_envio(envio_id, args["rut_conductor"])
+            return {"mensaje": "Conductor asignado exitosamente", "envio_id": envio.id, "conductor_id": envio.conductor_id}, 200
+        except ValueError as ve:
+            return {"error": str(ve)}, 400
+        except Exception as e:
+            return {"error": f"Error inesperado: {str(e)}"}, 500
+
+class AsignarRutaResource(Resource):
+    def put(self, envio_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("ruta_id", type=int, required=True, help="El ID de la ruta es obligatorio.")
+        args = parser.parse_args()
+
+        try:
+            envio = asignar_ruta_a_envio(envio_id, args["ruta_id"])
+            return {"mensaje": "Ruta asignada exitosamente", "envio_id": envio.id, "ruta_id": envio.ruta_id}, 200
+        except ValueError as ve:
+            return {"error": str(ve)}, 400
+        except Exception as e:
+            return {"error": f"Error inesperado: {str(e)}"}, 500

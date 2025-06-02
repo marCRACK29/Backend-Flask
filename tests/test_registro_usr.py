@@ -12,7 +12,7 @@ timestamp = int(time.time())
 
 # Cliente con todos los datos requeridos
 nuevo_cliente = {
-    "RUT": f"21.595.{random.randint(100, 999)}-{random.randint(0, 9)}",
+    "RUT": f"21.595.999-4",
     "nombre": f"Cliente Test {timestamp}",
     "correo": f"cliente{timestamp}@example.com",
     "contraseña": "holacliente",
@@ -25,7 +25,7 @@ nuevo_cliente = {
 
 # Conductor sin datos de dirección (no los necesita)
 nuevo_conductor = {
-    "RUT": f"15.123.{random.randint(100, 999)}-{random.randint(0, 9)}",
+    "RUT": f"15.123.123-7",
     "nombre": f"Conductor Test {timestamp}",
     "correo": f"conductor{timestamp}@example.com",
     "contraseña": "holaconductor"

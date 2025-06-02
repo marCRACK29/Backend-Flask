@@ -29,12 +29,14 @@ def create_app():
     api.add_resource(AuthRegisterConductorResource, '/api/auth/register/conductor')
     api.add_resource(AuthRegisterAdminResource, '/api/auth/register/admin')
     
-    from app.resources.envio_resources import EnvioResource, EnvioEstadoResource, EnviosClienteResource, EnviosConductorResource, EnvioPaquetesResource
+    from app.resources.envio_resources import EnvioEstadoResource, EnviosClienteResource, EnviosConductorResource, EnvioPaquetesResource, AsignarConductorResource, AsignarRutaResource
     api.add_resource(EnvioEstadoResource, '/api/envios/<int:envio_id>/estado')
     api.add_resource(EnviosClienteResource, '/api/envios/mis')
     api.add_resource(EnviosConductorResource, '/api/envios/conductor')
     api.add_resource(EnvioPaquetesResource, '/api/envios')
-    
+    api.add_resource(AsignarConductorResource, "/api/envios/<int:envio_id>/asignar_conductor")
+    api.add_resource(AsignarRutaResource, "/api/envios/<int:envio_id>/asignar_ruta")
+
     from app.resources.ruta import RutaResource
     api.add_resource(RutaResource, '/api/rutas')
 

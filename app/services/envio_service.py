@@ -5,22 +5,23 @@ from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 # No existe un remitente aún al crear un envío
-def crear_envio(remitente_id, ruta_id, conductor_id): 
-    nuevo_envio = Envio(remitente_id=remitente_id, ruta_id=ruta_id, conductor_id=conductor_id)
+# def crear_envio(remitente_id, ruta_id, conductor_id): 
+#     nuevo_envio = Envio(remitente_id=remitente_id, ruta_id=ruta_id, conductor_id=conductor_id)
 
-    try:
-        db.session.add(nuevo_envio)
-        db.session.commit()
-        return nuevo_envio
-    except IntegrityError:
-        raise ValueError("No se pudo crear el envío. Verifique que los datos se ingresaron correctamente.")
+#     try:
+#         db.session.add(nuevo_envio)
+#         db.session.commit()
+#         return nuevo_envio
+#     except IntegrityError:
+#         raise ValueError("No se pudo crear el envío. Verifique que los datos se ingresaron correctamente.")
 
 
 def crear_envio_con_paquetes(data):
     envio = Envio(
         remitente_id=data["remitente_id"],
-        ruta_id=data["ruta_id"],
-        conductor_id=data["conductor_id"]
+        receptor_id=data["receptor_id"],
+        conductor_id=data.get("conductor_id"),
+        ruta_id=data.get("ruta_id")
     )
 
     paquetes_data = data.get("paquetes", [])
@@ -129,4 +130,32 @@ def obtener_envios_por_conductor(conductor_id):
     return envios
 
         
-    
+def asignar_conductor_a_envio(envio_id, rut_conductor):
+    envio = Envio.query.get(envio_id)
+    if not envio:
+        raise ValueError(f"No se encontró el envío con id {envio_id}")
+
+    envio.conductor_id = rut_conductor
+
+    try:
+        db.session.commit()
+        return envio
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error al asignar conductor: {str(e)}")
+
+
+def asignar_ruta_a_envio(envio_id, ruta_id):
+    envio = Envio.query.get(envio_id)
+    if not envio:
+        raise ValueError(f"No se encontró el envío con id {envio_id}")
+
+    envio.ruta_id = ruta_id
+
+    try:
+        db.session.commit()
+        return envio
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error al asignar ruta: {str(e)}")
+
