@@ -12,9 +12,9 @@ timestamp = int(time.time())
 
 # Cliente con todos los datos requeridos
 nuevo_cliente = {
-    "RUT": f"21.595.{random.randint(100, 999)}-{random.randint(0, 9)}",
-    "nombre": f"Cliente Test {timestamp}",
-    "correo": f"cliente{timestamp}@example.com",
+    "RUT": f"21.595.452-3",
+    "nombre": f"Pedrito",
+    "correo": f"clientePedrito@example.com",
     "contraseña": "holacliente",
     "numero_domicilio": 444,
     "calle": "Calle Verdadera",
@@ -23,11 +23,10 @@ nuevo_cliente = {
     "codigo_postal": 1234888
 }
 
-# Conductor sin datos de dirección (no los necesita)
 nuevo_conductor = {
-    "RUT": f"15.123.{random.randint(100, 999)}-{random.randint(0, 9)}",
-    "nombre": f"Conductor Test {timestamp}",
-    "correo": f"conductor{timestamp}@example.com",
+    "RUT": f"15.123.102-4",
+    "nombre": f"Conductor Carlos",
+    "correo": f"conductorCarlos@example.com",
     "contraseña": "holaconductor"
 }
 
@@ -58,8 +57,6 @@ def limpiar_base_datos():
 print("Iniciando pruebas de registro...")
 print(f"Timestamp único: {timestamp}")
 
-# Limpiar datos previos (opcional)
-# limpiar_base_datos()
 
 response_cliente = requests.post(BASE + "api/auth/register/cliente", json=nuevo_cliente)
 print_response("cliente", response_cliente)

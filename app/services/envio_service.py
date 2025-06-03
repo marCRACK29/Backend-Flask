@@ -1,106 +1,69 @@
 from app import db
-from app.models import Envio, Estado, EstadoEnvio
-from app.models.estado import EstadoEnum
+from app.models import Envio, Estado
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 # No existe un remitente aún al crear un envío
-def crear_envio(remitente_id, ruta_id, conductor_id, direccion_origen, direccion_destino): 
-    nuevo_envio = Envio(
-        remitente_id=remitente_id, 
-        ruta_id=ruta_id, 
-        conductor_id=conductor_id,
-        direccion_origen=direccion_origen,
-        direccion_destino=direccion_destino
-    )
-
+def crear_envio(datos):
     try:
+        # Crear el estado inicial
+        estado_inicial = Estado(estado="preparacion")
+        db.session.add(estado_inicial)
+        db.session.flush()  # Para obtener el ID del estado
+
+        # Crear el envío
+        nuevo_envio = Envio(
+            receptor_id=datos.get('receptor_id'),
+            remitente_id=datos.get('remitente_id'),
+            conductor_id=datos.get('conductor_id'),
+            direccion_origen=datos.get('direccion_origen'),
+            direccion_destino=datos.get('direccion_destino'),
+            estado_id=estado_inicial.id
+        )
         db.session.add(nuevo_envio)
         db.session.commit()
         return nuevo_envio
-    except IntegrityError:
-        raise ValueError("No se pudo crear el envío. Verifique que los datos se ingresaron correctamente.")
-
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise e
 
 def actualizar_estado_envio(envio_id, nuevo_estado_str):
     try:
-        # Validar que el estado sea uno de los permitidos
-        try:
-            nuevo_estado_enum = EstadoEnum(nuevo_estado_str)
-        except ValueError:
-            raise ValueError(f"Estado inválido. Debe ser uno de: {[e.value for e in EstadoEnum]}")
-        
-        envio = Envio.query.get(envio_id)
-        if not envio:
-            raise LookupError(f"Envío con id {envio_id} no encontrado")
-        
-        # Obtener el estado actual
-        estado_actual = EstadoEnvio.query.filter_by(envio_id=envio_id).order_by(EstadoEnvio.timestamp.desc()).first()
-        
-        # Validar transición de estado
-        if estado_actual:
-            estado_actual_enum = estado_actual.estado.estado
-            if estado_actual_enum == EstadoEnum.ENTREGADO:
-                raise ValueError("No se puede modificar el estado de un envío ya entregado")
-            if estado_actual_enum == EstadoEnum.TRANSITO and nuevo_estado_enum == EstadoEnum.PREPARACION:
-                raise ValueError("No se puede volver a PREPARACION desde TRANSITO")
-        
-        # Buscar o crear el estado en la base de datos
-        estado_db = Estado.query.filter_by(estado=nuevo_estado_enum).first()
-        if not estado_db:
-            estado_db = Estado(estado=nuevo_estado_enum)
-            db.session.add(estado_db)
-        
-        nuevo_registro = EstadoEnvio(
-            envio = envio,
-            estado = estado_db,
-            timestamp = datetime.now(timezone.utc)
-        )
-        db.session.add(nuevo_registro)
-        db.session.commit()
+        envio = Envio.query.get_or_404(envio_id)
+        estado_actual = envio.estado.estado
 
-        return {
-            "envio_id": envio_id,
-            "nuevo_estado": nuevo_estado_enum.value,
-            "timestamp": nuevo_registro.timestamp.isoformat()
-        }
-    
+        # Validar el nuevo estado
+        estados_validos = ["preparacion", "transito", "entregado"]
+        if nuevo_estado_str not in estados_validos:
+            raise ValueError(f"Estado inválido. Debe ser uno de: {estados_validos}")
+
+        # Validar la transición de estado
+        if estado_actual == "entregado":
+            raise ValueError("No se puede modificar el estado de un envío entregado")
+
+        if estado_actual == "transito" and nuevo_estado_str == "preparacion":
+            raise ValueError("No se puede volver a preparación desde tránsito")
+
+        # Crear nuevo estado
+        nuevo_estado = Estado(estado=nuevo_estado_str)
+        db.session.add(nuevo_estado)
+        db.session.flush()
+
+        # Actualizar el estado del envío
+        envio.estado_id = nuevo_estado.id
+        db.session.commit()
+        return envio
     except SQLAlchemyError as e:
         db.session.rollback()
-        print("SQLAlchemy error:", str(e))
-        raise RuntimeError("Error al actualizar el estado de la base de datos") from e
-    
+        raise e
 
-def obtener_envios_por_usuario(rut_usuario):
-    if not isinstance(rut_usuario, str) or len(rut_usuario.strip()) == 0:
-        raise ValueError("El RUT del usuario debe ser un string no vacío.")
-    
-    try:
-        envios = Envio.query.filter((Envio.remitente_id == rut_usuario)).all()
+def obtener_envios_por_usuario(rut):
+    return Envio.query.filter(
+        (Envio.remitente_id == rut) | (Envio.receptor_id == rut)
+    ).all()
 
-        if not envios:
-            return None
-
-        return envios
-
-    except Exception as e:
-        raise RuntimeError(f"Ocurrió un error al consultar los envíos: {str(e)}")
-
-def obtener_envios_por_conductor(conductor_id):
-    """
-    Obtiene todos los envíos asignados a un conductor específico.
-    
-    Args:
-        conductor_id (str): RUT del conductor
-        
-    Returns:
-        list: Lista de envíos asignados al conductor
-    """
-    envios = Envio.query.filter_by(conductor_id=conductor_id).all()
-    if not envios:
-        return None
-        
-    return envios
+def obtener_envios_por_conductor(rut):
+    return Envio.query.filter_by(conductor_id=rut).all()
 
         
     

@@ -1,15 +1,15 @@
-import enum
 from app import db
-
-class EstadoEnum(enum.Enum):
-    PREPARACION = "En preparación"
-    TRANSITO = "En transito"
-    ENTREGADO = "Entregado"
 
 class Estado(db.Model):
     __tablename__ = 'estado_entrega'
 
     id = db.Column(db.Integer, primary_key=True)
-    estado = db.Column(db.Enum(EstadoEnum), nullable=False)
+    estado = db.Column(db.String(20), nullable=False)
 
-    envios = db.relationship('EstadoEnvio', back_populates='estado')
+    envios = db.relationship('Envio', back_populates='estado')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'estado': self.estado
+        }

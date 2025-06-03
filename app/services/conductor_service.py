@@ -1,10 +1,12 @@
 from app import db
-from app.models import Envio, EstadoEnvio, Estado
-from app.models.estado import EstadoEnum
+from app.models.conductor import Conductor
+from app.models.envio import Envio
+from app.models.estado import Estado
 from app.services.envio_service import obtener_envios_por_conductor, actualizar_estado_envio
-from typing import List, Dict, Any, Optional
+from typing import Dict, Any
+from sqlalchemy.exc import SQLAlchemyError
 
-def obtener_envios_en_curso(conductor_id: str) -> Optional[List[Dict[str, Any]]]:
+def obtener_envios_en_curso(conductor_id: str):
     """
     Obtiene los envíos en curso (estado TRANSITO) de un conductor específico.
     
@@ -23,18 +25,14 @@ def obtener_envios_en_curso(conductor_id: str) -> Optional[List[Dict[str, Any]]]
             
         envios_en_curso = []
         for envio in envios:
-            # Obtener el último estado del envío
-            ultimo_estado = EstadoEnvio.query.filter_by(envio_id=envio.id).order_by(EstadoEnvio.timestamp.desc()).first()
-            
             # Si el envío está en estado TRANSITO, agregarlo a la lista
-            if ultimo_estado and ultimo_estado.estado.estado == EstadoEnum.TRANSITO:
+            if envio.estado == "transito":
                 envios_en_curso.append({
                     "id_envio": envio.id,
                     "remitente": envio.remitente_id,
                     "receptor": envio.receptor_id,
                     "ruta_id": envio.ruta_id,
-                    "fecha_ultimo_estado": ultimo_estado.timestamp.isoformat(),
-                    "estado_actual": ultimo_estado.estado.estado.value
+                    "estado_actual": envio.estado
                 })
         
         return envios_en_curso if envios_en_curso else None
@@ -80,3 +78,21 @@ def actualizar_estado_envio_conductor(envio_id: int, conductor_id: str, nuevo_es
         if isinstance(e, (ValueError, LookupError)):
             raise
         raise RuntimeError(f"Error al actualizar el estado del envío: {str(e)}")
+
+def obtener_conductor(rut):
+    return Conductor.query.get_or_404(rut)
+
+def obtener_envios_activos_conductor(rut):
+    try:
+        conductor = Conductor.query.get_or_404(rut)
+        envios = Envio.query.filter_by(conductor_id=rut).all()
+        
+        envios_activos = []
+        for envio in envios:
+            if envio.estado == "transito":
+                envios_activos.append(envio)
+        
+        return envios_activos
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise e

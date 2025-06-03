@@ -7,7 +7,7 @@ BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:5000/")
 # Datos de prueba
 conductor_id = "15.123.123-5"
 envio_id = 5  # Asegúrate de que este envío exista y pertenezca al conductor
-nuevo_estado = "Entregado"
+nuevo_estado = "entregado"
 
 # Realizar la petición PUT para actualizar el estado
 response = requests.put(

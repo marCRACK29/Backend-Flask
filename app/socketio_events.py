@@ -72,7 +72,6 @@ def handle_location_update(data):
             'timestamp': timestamp.isoformat()
         }, room=f'envio_{envio["id"]}')
 
-# ✅ FUNCIONES CORREGIDAS
 def verificar_permiso_seguimiento(envio_id, user_id, user_type) -> bool:
     """Verificar si el usuario puede trackear el envío"""
     try:
@@ -109,17 +108,10 @@ def get_envio_status(envio_id):
                     .filter_by(conductor_id=envio.conductor_id)
                     .order_by(Localizacion.timestamp.desc())
                     .first()) if envio.conductor_id else None
-        
-        # Obtener último estado del envío
-        ultimo_estado = (EstadoEnvio.query
-                        .filter_by(envio_id=envio.id)
-                        .order_by(EstadoEnvio.timestamp.desc())
-                        .first())
 
         return {
             'envio_id': envio.id,
-            'estado': ultimo_estado.estado.estado.value if ultimo_estado and ultimo_estado.estado else 'Sin estado',
-            'estado_id': ultimo_estado.estado_id if ultimo_estado else None,
+            'estado': envio.estado,
             'direccion_origen': envio.direccion_origen,
             'direccion_destino': envio.direccion_destino,
             'conductor_nombre': conductor.nombre if conductor else None,
@@ -128,8 +120,7 @@ def get_envio_status(envio_id):
             'receptor_nombre': receptor.nombre if receptor else None,
             'latitude': ubicacion.latitude if ubicacion else None,
             'longitude': ubicacion.longitude if ubicacion else None,
-            'last_location_update': ubicacion.timestamp.isoformat() if ubicacion else None,
-            'fecha_creacion': envio.fecha_creacion.isoformat() if hasattr(envio, 'fecha_creacion') else None
+            'last_location_update': ubicacion.timestamp.isoformat() if ubicacion else None
         }
     except Exception as e:
         print(f"Error obteniendo estado del envío {envio_id}: {e}")
@@ -167,24 +158,13 @@ def get_envios_activos_by_conductor(conductor_id):
     """Obtener envíos activos de un conductor"""
     try:
         # Estados que consideramos "activos"
-        estados_activos = [EstadoEnum.PREPARACION, EstadoEnum.TRANSITO]
+        estados_activos = ["preparacion", "transito"]
         
-        # Query corregida con subquery para obtener el último estado
-        subquery = (db.session.query(EstadoEnvio.envio_id, 
-                                   db.func.max(EstadoEnvio.timestamp).label('max_timestamp'))
-                   .group_by(EstadoEnvio.envio_id)
-                   .subquery())
-        
+        # Query simplificada para obtener envíos activos
         envios_activos = (db.session.query(Envio)
-                         .join(EstadoEnvio, Envio.id == EstadoEnvio.envio_id)
-                         .join(Estado, EstadoEnvio.estado_id == Estado.id)
-                         .join(subquery, db.and_(
-                             EstadoEnvio.envio_id == subquery.c.envio_id,
-                             EstadoEnvio.timestamp == subquery.c.max_timestamp
-                         ))
                          .filter(
                              Envio.conductor_id == conductor_id,
-                             Estado.estado.in_(estados_activos)
+                             Envio.estado.in_(estados_activos)
                          )
                          .all())
         
@@ -194,8 +174,7 @@ def get_envios_activos_by_conductor(conductor_id):
         print(f"❌ Error obteniendo envíos activos: {e}")
         return []
 
-# ✅ FUNCIÓN ADICIONAL ÚTIL
-def notificar_cambio_estado(envio_id, nuevo_estado):
+def notificar_cambio_estado(envio_id):
     """Notificar cambio de estado a todos los clientes que trackean el envío"""
     try:
         estado_actualizado = get_envio_status(envio_id)

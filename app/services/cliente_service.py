@@ -114,11 +114,9 @@ def obtener_envios_cliente(rut_cliente: str) -> Optional[List[Dict[str, Any]]]:
         return [
             {
                 "id_envio": envio.id,
-                "estado_actual": envio.historial_estados[-1].estado.estado.value if envio.historial_estados else "Sin estado",
-                "fecha_ultimo_estado": envio.historial_estados[-1].timestamp.isoformat() if envio.historial_estados else None,
+                "estado_actual": envio.estado,
                 "remitente": envio.remitente_id,
                 "receptor": envio.receptor_id,
-                "ruta_id": envio.ruta_id
             }
             for envio in envios
         ]

@@ -7,9 +7,10 @@ BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:5000/")
 # ID del envío a modificar
 envio_id = 4
 
-# Cambiar el estado a "En tránsito"
+# Cambiar el estado a "transito"
+# Solo ocupar "transito" o "entregado" 
 payload = {
-    "nuevo_estado": "Entregado"  # Usando el valor directamente
+    "nuevo_estado": "transito"  # Usando el valor del string directamente
 }
 
 # Realizar la petición
