@@ -1,51 +1,21 @@
 from app import db
-from app.models import Envio, Estado, EstadoEnvio, Paquete
+from app.models import Envio, Estado, EstadoEnvio
 from app.models.estado import EstadoEnum
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 # No existe un remitente aún al crear un envío
-# def crear_envio(remitente_id, ruta_id, conductor_id): 
-#     nuevo_envio = Envio(remitente_id=remitente_id, ruta_id=ruta_id, conductor_id=conductor_id)
-
-#     try:
-#         db.session.add(nuevo_envio)
-#         db.session.commit()
-#         return nuevo_envio
-#     except IntegrityError:
-#         raise ValueError("No se pudo crear el envío. Verifique que los datos se ingresaron correctamente.")
-
-
-def crear_envio_con_paquetes(data):
-    envio = Envio(
-        remitente_id=data["remitente_id"],
-        receptor_id=data["receptor_id"],
-        conductor_id=data.get("conductor_id"),
-        ruta_id=data.get("ruta_id")
-    )
-
-    paquetes_data = data.get("paquetes", [])
-    if not paquetes_data:
-        raise ValueError("Debes proporcionar al menos un paquete")
-
-    for paquete_info in paquetes_data:
-        paquete = Paquete(
-            peso=paquete_info["peso"],
-            alto=paquete_info.get("alto"),
-            largo=paquete_info.get("largo"),
-            ancho=paquete_info.get("ancho"),
-            descripcion=paquete_info.get("descripcion"),
-            envio=envio  # Se vincula el paquete con el envío
-        )
-        db.session.add(paquete)
+def crear_envio(remitente_id, receptor_id, direccion_destino): 
+    nuevo_envio = Envio(remitente_id=remitente_id, receptor_id=receptor_id, direccion_destino=direccion_destino)
 
     try:
-        db.session.add(envio)
+        db.session.add(nuevo_envio)
         db.session.commit()
-        return envio
+        return nuevo_envio
     except IntegrityError:
         db.session.rollback()
-        raise ValueError("No se pudo crear el envío. Verifica los datos ingresados.")
+        raise ValueError("No se pudo crear el envío. Verifique que los datos se ingresaron correctamente.")
+
 
 
 
@@ -105,8 +75,9 @@ def obtener_envios_por_usuario(rut_usuario):
     try:
         envios = Envio.query.filter((Envio.remitente_id == rut_usuario)).all()
 
-        if not envios:
-            return None
+        if envios is None:
+            return [], 200
+
 
         return envios
 

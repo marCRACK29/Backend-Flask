@@ -5,13 +5,14 @@ class Envio(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     # Almacena el id del usuario (su RUT)
-    receptor_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'), nullable=False)
-    remitente_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'), nullable=False)
+    receptor_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'), nullable = False)
+    remitente_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'), nullable = False)
     # Relación con ruta: un envío tiene una sola ruta. 
     ruta_id = db.Column(db.Integer, db.ForeignKey('ruta.id'))
     # Relación con conductor: un envío tiene un solo conductor. 
     conductor_id = db.Column(db.String(12), db.ForeignKey('conductor.RUT'))
-
+    direccion_origen = db.Column(db.String(255))
+    direccion_destino = db.Column(db.String(255), nullable = False)
 
     # Receptor no siempre puede ser cliente, pero por ahora lo dejaremos así. CORREGIR
     receptor = db.relationship('Cliente', foreign_keys=[receptor_id], back_populates='envios_recibidos')
@@ -23,4 +24,4 @@ class Envio(db.Model):
     ruta_en_envio = db.relationship('Ruta', foreign_keys=[ruta_id], back_populates='ruta_envio')
     conductor = db.relationship('Conductor', foreign_keys=[conductor_id], back_populates='envios_asignados')
     gestiones_admin = db.relationship('AdminEnvio', back_populates='envio')
-    localizaciones = db.relationship('Localizacion', backref='envio', lazy=True)
+    

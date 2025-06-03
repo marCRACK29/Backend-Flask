@@ -1,64 +1,38 @@
 from flask_restful import Resource, reqparse, request
-from app.services.envio_service import actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor, crear_envio_con_paquetes, asignar_conductor_a_envio, asignar_ruta_a_envio
+from app.services.envio_service import actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor,crear_envio, asignar_conductor_a_envio, asignar_ruta_a_envio
 
 
 # Gestiona nueva envio
-# class EnvioResource(Resource):
-#     def post(self):
-#         parser = reqparse.RequestParser() # asegura que recibo la info que necesito
-#         # espero recibir los siguientes campos
-#         parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido") #help indica lo que le envio de vuelta
-#         parser.add_argument("conductor_id", type=str, required=True, help="conductor_id es requerido")
-#         parser.add_argument("ruta_id", type=int, required=True, help="ruta_id es requerida")
-
-#         args = parser.parse_args() # lee los datos de la solicitud, crea un diccionario con los datos
-#         try:
-#             envio=crear_envio(
-#                 remitente_id=args['remitente_id'], 
-#                 ruta_id=args['ruta_id'], 
-#                 conductor_id=args['conductor_id']
-#             )
-#             return {
-#                 "mensaje": "Envío creado exitosamente",
-#                 "envío": {
-#                     "id": envio.id,
-#                     "usuario id": envio.remitente_id,
-#                     "conductor id": envio.conductor_id,
-#                 }
-#             }, 201
-#         except Exception as e:
-#             return {"error": str(e)}, 400
-        
-
-
-
-class EnvioPaquetesResource(Resource):
+class EnvioResource(Resource):
     def post(self):
-        data = request.get_json()
+        parser = reqparse.RequestParser() # asegura que recibo la info que necesito
+        # espero recibir los siguientes campos
+        parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido") #help indica lo que le envio de vuelta
+        parser.add_argument("receptor_id", type=str, required=True, help="receptor_id es requerido")
+        parser.add_argument("direccion_destino", type=str, required=True, help="direccion_destino es requerido")
 
+        args = parser.parse_args() # lee los datos de la solicitud, crea un diccionario con los datos
         try:
-            envio = crear_envio_con_paquetes(data)
+            if args['remitente_id']==args['receptor_id']:
+                raise 
+            envio=crear_envio(
+                remitente_id=args['remitente_id'], 
+                receptor_id=args['receptor_id'], 
+                direccion_destino=args['direccion_destino']
+            )
             return {
                 "mensaje": "Envío creado exitosamente",
-                "envio": {
+                "envío": {
                     "id": envio.id,
                     "remitente_id": envio.remitente_id,
-                    "conductor_id": envio.conductor_id,
-                    "paquetes": [
-                        {
-                            "id": p.id,
-                            "peso": p.peso,
-                            "alto": p.alto,
-                            "largo": p.largo,
-                            "ancho": p.ancho,
-                            "descripcion": p.descripcion
-                        }
-                        for p in envio.paquetes
-                    ]
+                    "receptor_id": envio.receptor_id,
+                    "direccion_destino": envio.direccion_destino,
                 }
             }, 201
         except Exception as e:
             return {"error": str(e)}, 400
+        
+
 
 # Gestiona cambio estado envio
 class EnvioEstadoResource(Resource):
@@ -84,31 +58,19 @@ class EnvioEstadoResource(Resource):
 class EnviosClienteResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("usuario_id",type=str,required=True,location="args") #location args es que este dato viene de la url, no del body
-        args = parser.parse_args()                                               #reqparse no los encuentra por defecto en el GET
+        parser.add_argument("usuario_id", type=str, required=True, location="args")
+        args = parser.parse_args()
 
         try:
             usuario_id = args["usuario_id"]
             envios = obtener_envios_por_usuario(usuario_id)
 
             if envios is None:
-                return{"mensaje": "Aun no has realizado envios"}, 200
-            
+                return {"mensaje": "Aún no has realizado envíos"}, 200
+
             resultado = []
 
             for envio in envios:
-                paquetes = [
-                    {
-                        "id": paquete.id,
-                        "peso": paquete.peso,
-                        "alto": paquete.alto,
-                        "largo": paquete.largo,
-                        "ancho": paquete.ancho,
-                        "descripcion": paquete.descripcion
-                    }
-                    for paquete in envio.paquetes
-                ]
-
                 estado_actual = (
                     envio.historial_estados[-1].estado.estado.value
                     if envio.historial_estados else "Sin estado"
@@ -123,10 +85,12 @@ class EnviosClienteResource(Resource):
                     "id_envio": envio.id,
                     "estado_actual": estado_actual,
                     "fecha_ultimo_estado": fecha_estado,
-                    "paquetes": paquetes
+                    "receptor_id": envio.receptor_id,
+                    "direccion_destino": envio.direccion_destino,
                 })
+
             return resultado, 200
-        
+
         except ValueError as ve:
             return {"error": str(ve)}, 400
         except RuntimeError as re:
