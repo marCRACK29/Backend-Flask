@@ -15,7 +15,6 @@ def crear_envio(datos):
         nuevo_envio = Envio(
             receptor_id=datos.get('receptor_id'),
             remitente_id=datos.get('remitente_id'),
-            conductor_id=datos.get('conductor_id'),
             direccion_origen=datos.get('direccion_origen'),
             direccion_destino=datos.get('direccion_destino'),
             estado_id=estado_inicial.id
@@ -56,6 +55,21 @@ def actualizar_estado_envio(envio_id, nuevo_estado_str):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise e
+
+        
+def asignar_conductor_a_envio(envio_id, rut_conductor):
+    envio = Envio.query.get(envio_id)
+    if not envio:
+        raise ValueError(f"No se encontró el envío con id {envio_id}")
+
+    envio.conductor_id = rut_conductor
+
+    try:
+        db.session.commit()
+        return envio
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error al asignar conductor: {str(e)}")
 
 def obtener_envios_por_usuario(rut):
     return Envio.query.filter(

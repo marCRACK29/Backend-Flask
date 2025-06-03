@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from app.services.envio_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor
+from app.services.envio_service import crear_envio, actualizar_estado_envio, obtener_envios_por_usuario, obtener_envios_por_conductor, asignar_conductor_a_envio
 from app.models.envio import Envio
 
 # Gestiona nuevo envio
@@ -7,7 +7,6 @@ class EnvioResource(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido")
-        parser.add_argument("conductor_id", type=str, required=True, help="conductor_id es requerido")
         parser.add_argument("direccion_origen", type=str, required=True, help="direccion_origen es requerida")
         parser.add_argument("direccion_destino", type=str, required=True, help="direccion_destino es requerida")
         parser.add_argument("receptor_id", type=str, required=False, help="receptor_id es opcional")
@@ -21,7 +20,6 @@ class EnvioResource(Resource):
                     "id": envio.id,
                     "remitente_id": envio.remitente_id,
                     "receptor_id": envio.receptor_id,
-                    "conductor_id": envio.conductor_id,
                     "direccion_origen": envio.direccion_origen,
                     "direccion_destino": envio.direccion_destino,
                     "estado": envio.estado.to_dict() if envio.estado else None
@@ -62,20 +60,37 @@ class EnviosClienteResource(Resource):
 
             if envios is None:
                 return{"mensaje": "Aun no has realizado envios"}, 200
-            return [
-                {
+            
+            resultado = []
+
+            for envio in envios:
+                estado_actual = (
+                    envio.historial_estados[-1].estado.estado.value
+                    if envio.historial_estados else "Sin estado"
+                )
+
+                fecha_estado = (
+                    envio.historial_estados[-1].timestamp.isoformat()
+                    if envio.historial_estados else None
+                )
+
+                resultado.append({
                     "id_envio": envio.id,
-                    "estado_actual": envio.estado.to_dict() if envio.estado else None
-                }
-                for envio in envios
-            ], 200
+                    "estado_actual": estado_actual,
+                    "fecha_ultimo_estado": fecha_estado,
+                    "receptor_id": envio.receptor_id,
+                    "direccion_destino": envio.direccion_destino,
+                })
+
+            return resultado, 200
+
         except ValueError as ve:
             return {"error": str(ve)}, 400
         except RuntimeError as re:
             return {"error": str(re)}, 500
         except Exception as e:
             return {"error": f"Error inesperado: {str(e)}"}, 500
-
+        
 class EnviosConductorResource(Resource):
     def get(self):
         parser = reqparse.RequestParser()
@@ -129,3 +144,17 @@ class EnvioIndividualResource(Resource):
         except Exception as e:
             print(f"Error en EnvioIndividualResource: {str(e)}")
             return {'error': f'Error interno del servidor: {str(e)}'}, 500
+        
+class AsignarConductorResource(Resource):
+    def put(self, envio_id):
+        parser = reqparse.RequestParser()
+        parser.add_argument("rut_conductor", type=str, required=True, help="El RUT del conductor es obligatorio.")
+        args = parser.parse_args()
+
+        try:
+            envio = asignar_conductor_a_envio(envio_id, args["rut_conductor"])
+            return {"mensaje": "Conductor asignado exitosamente", "envio_id": envio.id, "conductor_id": envio.conductor_id}, 200
+        except ValueError as ve:
+            return {"error": str(ve)}, 400
+        except Exception as e:
+            return {"error": f"Error inesperado: {str(e)}"}, 500

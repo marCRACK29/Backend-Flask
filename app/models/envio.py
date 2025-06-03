@@ -5,12 +5,12 @@ class Envio(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     # Almacena el id del usuario (su RUT)
-    receptor_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'))
+    receptor_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'), nullable=False)
     remitente_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'), nullable=False)
     # Relación con conductor: un envío tiene un solo conductor. 
-    conductor_id = db.Column(db.String(12), db.ForeignKey('conductor.RUT'), nullable=False)
-    direccion_origen = db.Column(db.String(255))
-    direccion_destino = db.Column(db.String(255))
+    conductor_id = db.Column(db.String(12), db.ForeignKey('conductor.RUT'))
+    direccion_origen = db.Column(db.String(255), nullable=False)
+    direccion_destino = db.Column(db.String(255), nullable=False)
     # Relación con estado actual
     estado_id = db.Column(db.Integer, db.ForeignKey('estado_entrega.id'), nullable=False)
 

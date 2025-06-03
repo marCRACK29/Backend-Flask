@@ -7,7 +7,7 @@ BASE = os.getenv("API_BASE_URL", "http://127.0.0.1:5000/")
 # Datos de prueba con IDs que existen en la base de datos
 nuevo_envio = {
     "remitente_id": "21.595.452-3",  # ID de un cliente que existe                  # ID de una ruta que existe
-    "conductor_id": "15.123.102-4",  # ID de un conductor que existe
+    "receptor_id": "21.595.452-3",  
     "direccion_origen": "Los Ángeles",
     "direccion_destino": "Concepción"
 }
