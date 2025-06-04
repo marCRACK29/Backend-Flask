@@ -95,8 +95,10 @@ class EnviosConductorResource(Resource):
                 {
                     "id_envio": envio.id,
                     "estado_actual": envio.estado.to_dict() if envio.estado else None,
+                    "direccion_destino": str(envio.direccion_destino) if envio.direccion_destino else '',
                     "remitente": envio.remitente_id,
-                    "receptor": envio.receptor_id
+                    "receptor": envio.receptor_id,
+                    "conductor_id": str(envio.conductor_id) if envio.conductor_id else ''
                 }
                 for envio in envios
             ], 200
