@@ -1,5 +1,5 @@
 from flask_restful import Resource, reqparse
-from app.services.cliente_service import actualizar_direccion, actualizar_correo, obtener_envios_cliente
+from app.services.cliente_service import actualizar_direccion, actualizar_correo, obtener_envios_cliente, obtener_info_cliente
 from typing import Tuple, Dict, Any, Union
 
 class ClienteDireccionResource(Resource):
@@ -119,6 +119,35 @@ class ClienteEnviosResource(Resource):
                 return {"mensaje": "No tienes envíos registrados"}, 200
                 
             return envios, 200
+            
+        except ValueError as ve:
+            return {"error": str(ve)}, 400
+        except RuntimeError as re:
+            return {"error": str(re)}, 500
+        except Exception as e:
+            return {"error": f"Error inesperado: {str(e)}"}, 500
+
+class ClienteInfoResource(Resource):
+    def get(self) -> Tuple[Dict[str, Any], int]:
+        """
+        Obtiene la información básica de un cliente (RUT, nombre y correo).
+        
+        Returns:
+            Tuple[Dict[str, Any], int]: Respuesta y código de estado HTTP
+        """
+        parser = reqparse.RequestParser()
+        parser.add_argument(
+            "rut_cliente",
+            type=str,
+            required=True,
+            location="args",
+            help="El RUT del cliente es requerido"
+        )
+        
+        try:
+            args = parser.parse_args()
+            info_cliente = obtener_info_cliente(args["rut_cliente"])
+            return info_cliente, 200
             
         except ValueError as ve:
             return {"error": str(ve)}, 400
