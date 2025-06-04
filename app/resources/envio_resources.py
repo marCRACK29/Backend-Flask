@@ -65,7 +65,9 @@ class EnviosClienteResource(Resource):
             return [
                 {
                     "id_envio": envio.id,
-                    "estado_actual": envio.estado.to_dict() if envio.estado else None
+                    "estado_actual": envio.estado.to_dict() if envio.estado else None,
+                    "receptor_id": envio.receptor_id,
+                    "direccion_destino": envio.direccion_destino
                 }
                 for envio in envios
             ], 200
