@@ -10,7 +10,7 @@ nuevo_envio = {
     "receptor_id": "21.595.452-3",
     "conductor_id": "15.123.102-4",  # ID de un conductor que existe
     "direccion_origen": "Los Ángeles",
-    "direccion_destino": "Concepción"
+    "direccion_destino": "Chillán"
 }
 
 print("Enviando datos:", nuevo_envio)

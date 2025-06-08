@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 from app.services.localizacion_service import registrar_localizacion, obtener_ultima_localizacion, obtener_historial_localizaciones
+from app.socketio_events import socketio
 
 class LocalizacionResource(Resource):
     def post(self):
@@ -8,7 +9,17 @@ class LocalizacionResource(Resource):
         parser.add_argument("latitud", type=float, required=True)
         parser.add_argument("longitud", type=float, required=True)
         args = parser.parse_args()
+        
         localizacion = registrar_localizacion(args["conductor_id"], args["latitud"], args["longitud"])
+        
+        # Emitir evento de actualización de ubicación
+        socketio.emit('conductor_location_update', {
+            'conductor_id': localizacion.conductor_id,
+            'latitud': localizacion.latitud,
+            'longitud': localizacion.longitud,
+            'timestamp': localizacion.timestamp.isoformat()
+        })
+        
         return {
             "id": localizacion.id,
             "conductor_id": localizacion.conductor_id,
