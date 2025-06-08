@@ -1,15 +1,66 @@
 from app import db
 from app.models import Cliente, Conductor, Admin
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import IntegrityError
+from flask import current_app
+import datetime
+import jwt
 import requests
 
 def login_usuario(email, password):
-    response = requests.post('http://servicio-auth:5000/login', json={
-        'email': email,
-        'password': password
-    })
-    return response.json(), response.status_code
+    """
+    Función de login local que busca en todas las tablas de usuarios
+    """
+    try:
+        # Buscar usuario en todas las tablas
+        usuario = None
+        tipo_usuario = None
+        
+        # Buscar en Cliente
+        cliente = Cliente.query.filter_by(correo=email).first()
+        if cliente and check_password_hash(cliente.contraseña, password):
+            usuario = cliente
+            tipo_usuario = 'cliente'
+        
+        # Buscar en Conductor
+        if not usuario:
+            conductor = Conductor.query.filter_by(correo=email).first()
+            if conductor and check_password_hash(conductor.contraseña, password):
+                usuario = conductor
+                tipo_usuario = 'conductor'
+        
+        # Buscar en Admin
+        if not usuario:
+            admin = Admin.query.filter_by(correo=email).first()
+            if admin and check_password_hash(admin.contraseña, password):
+                usuario = admin
+                tipo_usuario = 'admin'
+        
+        if not usuario:
+            return {'error': 'Credenciales inválidas'}, 401
+        
+        # Generar token JWT
+        token = jwt.encode({
+            'user_id': usuario.RUT,
+            'email': usuario.correo,
+            'tipo': tipo_usuario,
+            'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=24)
+        }, current_app.config['SECRET_KEY'], algorithm='HS256')
+        
+        return {
+            'message': 'Login exitoso',
+            'token': token,
+            'user': {
+                'id': usuario.RUT,
+                'name': usuario.nombre,
+                'email': usuario.correo,
+                'tipo': tipo_usuario
+            }
+        }, 200
+        
+    except Exception as e:
+        return {'error': f'Error interno del servidor: {str(e)}'}, 500
+
 
 def registrar_conductor(RUT, nombre, correo, contraseña):
     # Validar que no exista el usuario
@@ -62,7 +113,7 @@ def registrar_admin(RUT, nombre, correo, contraseña):
         db.session.rollback()
         print("ERROR DE INTEGRIDAD:", str(e))
         raise ValueError("No se pudo registrar el usuario. Verifica que RUT o correo no estén duplicados.")
-
+    
 def registrar_cliente(RUT, nombre, correo, contraseña, numero_domicilio, calle, ciudad, region, codigo_postal):
     # Validar que no exista el usuario
     if Cliente.query.filter_by(correo=correo).first():
