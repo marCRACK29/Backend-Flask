@@ -26,11 +26,13 @@ def create_app():
     api = Api(app)
 
     # Importar recursos aca para evitar importaciones circulares.
-    from app.resources.auth import AuthResource, AuthRegisterClienteResource, AuthRegisterAdminResource, AuthRegisterConductorResource
+    from app.resources.auth import AuthResource, AuthRegisterClienteResource, AuthRegisterAdminResource, AuthRegisterConductorResource, LogoutResource, ProfileResource
     api.add_resource(AuthResource, '/api/auth/login')
     api.add_resource(AuthRegisterClienteResource, '/api/auth/register/cliente')
     api.add_resource(AuthRegisterConductorResource, '/api/auth/register/conductor')
     api.add_resource(AuthRegisterAdminResource, '/api/auth/register/admin')
+    api.add_resource(LogoutResource, '/logout')
+    api.add_resource(ProfileResource, '/profile')
     
     from app.resources.envio_resources import EnvioResource, EnvioEstadoResource, EnviosClienteResource, EnviosConductorResource, EnvioIndividualResource
     api.add_resource(EnvioResource, '/api/envios')
