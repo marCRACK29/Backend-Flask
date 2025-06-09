@@ -7,59 +7,47 @@ import datetime
 import jwt
 import requests
 
-def login_usuario(email, password):
-    """
-    Función de login local que busca en todas las tablas de usuarios
-    """
+def login_usuario(correo, contraseña):
     try:
-        # Buscar usuario en todas las tablas
+        print(f"Intentando login con correo: {correo}")
+        
         usuario = None
         tipo_usuario = None
-        
-        # Buscar en Cliente
-        cliente = Cliente.query.filter_by(correo=email).first()
-        if cliente and check_password_hash(cliente.contraseña, password):
+
+        cliente = Cliente.query.filter_by(correo=correo).first()
+        if cliente and check_password_hash(cliente.contraseña, contraseña):
             usuario = cliente
             tipo_usuario = 'cliente'
-        
-        # Buscar en Conductor
+
         if not usuario:
-            conductor = Conductor.query.filter_by(correo=email).first()
-            if conductor and check_password_hash(conductor.contraseña, password):
+            conductor = Conductor.query.filter_by(correo=correo).first()
+            if conductor and check_password_hash(conductor.contraseña, contraseña):
                 usuario = conductor
                 tipo_usuario = 'conductor'
-        
-        # Buscar en Admin
+
         if not usuario:
-            admin = Admin.query.filter_by(correo=email).first()
-            if admin and check_password_hash(admin.contraseña, password):
+            admin = Admin.query.filter_by(correo=correo).first()
+            if admin and check_password_hash(admin.contraseña, contraseña):
                 usuario = admin
                 tipo_usuario = 'admin'
-        
+
         if not usuario:
             return {'error': 'Credenciales inválidas'}, 401
-        
-        # Generar token JWT
-        token = jwt.encode({
-            'user_id': usuario.RUT,
-            'email': usuario.correo,
-            'tipo': tipo_usuario,
-            'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=24)
-        }, current_app.config['SECRET_KEY'], algorithm='HS256')
-        
+
         return {
             'message': 'Login exitoso',
-            'token': token,
             'user': {
-                'id': usuario.RUT,
-                'name': usuario.nombre,
-                'email': usuario.correo,
+                'id': str(usuario.RUT),
+                'nombre': str(usuario.nombre),
+                'correo': str(usuario.correo),
                 'tipo': tipo_usuario
             }
         }, 200
-        
+
     except Exception as e:
+        print(f"Error en login_usuario: {str(e)}")
         return {'error': f'Error interno del servidor: {str(e)}'}, 500
+
 
 
 def registrar_conductor(RUT, nombre, correo, contraseña):

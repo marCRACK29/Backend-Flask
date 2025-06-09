@@ -8,11 +8,15 @@ from app import db
 class AuthResource(Resource):
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('email', required=True)
-        parser.add_argument('password', required=True)
+        parser.add_argument('correo', type=str, required=True, help="El correo es obligatorio")
+        parser.add_argument('contraseña', type=str, required=True, help="La contraseña es obligatoria")
         args = parser.parse_args()
 
-        return login_usuario(args['email'], args['password'])
+        try:
+            return login_usuario(args['correo'], args['contraseña'])
+        except Exception as e:
+            print(f"Error en login: {str(e)}")  # Debug log
+            return {'error': f'Error interno del servidor: {str(e)}'}, 500
 
 class AuthRegisterClienteResource(Resource):
     def post(self):
