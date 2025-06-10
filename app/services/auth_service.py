@@ -50,20 +50,20 @@ def login_usuario(correo, contraseña):
 
 
 
-def registrar_conductor(RUT, nombre, correo, contraseña):
+def registrar_conductor(RUT, name, email, password):
     # Validar que no exista el usuario
-    if Conductor.query.filter_by(correo=correo).first():
-        raise ValueError("El correo ya esta registrado.")
+    if Conductor.query.filter_by(email=email).first():
+        raise ValueError("El email ya esta registrado.")
     if Conductor.query.get(RUT):
         raise ValueError("El RUT ya esta registrado.")
     
-    c_hash = generate_password_hash(contraseña)
+    c_hash = generate_password_hash(password)
     
     nuevo_conductor = Conductor(
         RUT=RUT,
-        nombre=nombre,
-        correo=correo,
-        contraseña=c_hash
+        name=name,
+        email=email,
+        password=c_hash
     )
     
     try: 
@@ -74,22 +74,22 @@ def registrar_conductor(RUT, nombre, correo, contraseña):
     except IntegrityError as e:
         db.session.rollback()
         print("ERROR DE INTEGRIDAD:", str(e))
-        raise ValueError("No se pudo registrar el usuario. Verifica que RUT o correo no estén duplicados.")
+        raise ValueError("No se pudo registrar el usuario. Verifica que RUT o email no estén duplicados.")
 
-def registrar_admin(RUT, nombre, correo, contraseña):
+def registrar_admin(RUT, name, email, password):
     # Validar que no exista el usuario
-    if Admin.query.filter_by(correo=correo).first():
-        raise ValueError("El correo ya esta registrado.")
+    if Admin.query.filter_by(email=email).first():
+        raise ValueError("El email ya esta registrado.")
     if Admin.query.get(RUT):
         raise ValueError("El RUT ya esta registrado.")
     
-    c_hash = generate_password_hash(contraseña)
+    c_hash = generate_password_hash(password)
     
     nuevo_admin = Admin(
         RUT=RUT,
-        nombre=nombre,
-        correo=correo,
-        contraseña=c_hash
+        name=name,
+        email=email,
+        password=c_hash
     )
     
     try: 
@@ -104,18 +104,18 @@ def registrar_admin(RUT, nombre, correo, contraseña):
     
 def registrar_cliente(RUT, nombre, correo, contraseña, numero_domicilio, calle, ciudad, region, codigo_postal):
     # Validar que no exista el usuario
-    if Cliente.query.filter_by(correo=correo).first():
-        raise ValueError("El correo ya esta registrado.")
+    if Cliente.query.filter_by(email=email).first():
+        raise ValueError("El email ya esta registrado.")
     if Cliente.query.get(RUT):
         raise ValueError("El RUT ya esta registrado.")
     
-    c_hash = generate_password_hash(contraseña)
+    c_hash = generate_password_hash(password)
 
     nuevo_cliente = Cliente(
         RUT=RUT,
-        nombre=nombre,
-        correo=correo,
-        contraseña=c_hash,
+        name=name,
+        email=email,
+        password=c_hash,
         numero_domicilio=numero_domicilio,
         calle=calle,
         ciudad=ciudad,
@@ -131,4 +131,4 @@ def registrar_cliente(RUT, nombre, correo, contraseña, numero_domicilio, calle,
     except IntegrityError as e:
         db.session.rollback()
         print("ERROR DE INTEGRIDAD:", str(e))
-        raise ValueError("No se pudo registrar el usuario. Verifica que RUT o correo no estén duplicados.")
+        raise ValueError("No se pudo registrar el usuario. Verifica que RUT o email no estén duplicados.")
