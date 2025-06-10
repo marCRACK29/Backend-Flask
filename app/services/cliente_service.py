@@ -123,3 +123,31 @@ def obtener_envios_cliente(rut_cliente: str) -> Optional[List[Dict[str, Any]]]:
         
     except Exception as e:
         raise RuntimeError(f"Error al obtener envíos del cliente: {str(e)}")
+
+def obtener_info_cliente(rut_cliente: str) -> Dict[str, Any]:
+    """
+    Obtiene la información básica de un cliente (RUT, nombre y correo).
+    
+    Args:
+        rut_cliente (str): RUT del cliente
+        
+    Returns:
+        Dict[str, Any]: Información básica del cliente
+        
+    Raises:
+        ValueError: Si el cliente no existe
+        RuntimeError: Si ocurre un error en la base de datos
+    """
+    try:
+        cliente = Cliente.query.get(rut_cliente)
+        if not cliente:
+            raise ValueError(f"Cliente con RUT {rut_cliente} no encontrado")
+            
+        return {
+            "rut": cliente.RUT,
+            "nombre": cliente.nombre,
+            "correo": cliente.correo
+        }
+        
+    except SQLAlchemyError as e:
+        raise RuntimeError(f"Error al obtener información del cliente: {str(e)}")

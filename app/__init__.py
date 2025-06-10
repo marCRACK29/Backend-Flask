@@ -53,10 +53,11 @@ def create_app():
     api.add_resource(ConductorEnvioResource, '/api/conductor/envios/en-curso')
     api.add_resource(ConductorActualizarEstadoResource, '/api/conductor/envios/<int:envio_id>/estado')
 
-    from app.resources.cliente import ClienteDireccionResource, ClienteCorreoResource, ClienteEnviosResource
+    from app.resources.cliente import ClienteDireccionResource, ClienteCorreoResource, ClienteEnviosResource, ClienteInfoResource
     api.add_resource(ClienteDireccionResource, '/api/cliente/direccion')
     api.add_resource(ClienteCorreoResource, '/api/cliente/correo')
     api.add_resource(ClienteEnviosResource, '/api/cliente/envios')
+    api.add_resource(ClienteInfoResource, '/api/cliente/info')
 
     # Test simple para testear conexión entre frontend y backend
     from app.resources.test_resource import TestConnectionResource
