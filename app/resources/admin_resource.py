@@ -24,7 +24,7 @@ class ListaConductoresResource(Resource):
             "conductores": [
                 {
                     "RUT": c.RUT,
-                    "nombre": c.nombre,      # Ajusta los campos según tu modelo
+                    "nombre": c.nombre,
                 } for c in conductores
             ]
         }, 200
@@ -36,7 +36,7 @@ class EnviosSinConductorResource(Resource):
             "envios": [
                 {
                     "id": e.id,
-                    "direccion_destino": e.direccion_destino,   # Ajusta según los campos que quieras mostrar
+                    "direccion_destino": e.direccion_destino,
                     "estado": e.estado.to_dict()
                 } for e in envios
             ]
