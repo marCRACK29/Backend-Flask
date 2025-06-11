@@ -65,5 +65,20 @@ def obtener_envios_por_usuario(rut):
 def obtener_envios_por_conductor(rut):
     return Envio.query.filter_by(conductor_id=rut).all()
 
+def asignar_conductor_a_envio(envio_id, rut_conductor):
+    envio = Envio.query.get(envio_id)
+    if not envio:
+        raise ValueError(f"No se encontró el envío con id {envio_id}")
+
+    envio.conductor_id = rut_conductor
+
+    try:
+        db.session.commit()
+        return envio
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise RuntimeError(f"Error al asignar conductor: {str(e)}")
+
+
         
     

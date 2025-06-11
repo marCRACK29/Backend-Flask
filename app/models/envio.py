@@ -8,7 +8,7 @@ class Envio(db.Model):
     receptor_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'))
     remitente_id = db.Column(db.String(12), db.ForeignKey('cliente.RUT'), nullable=False)
     # Relación con conductor: un envío tiene un solo conductor. 
-    conductor_id = db.Column(db.String(12), db.ForeignKey('conductor.RUT'), nullable=False)
+    conductor_id = db.Column(db.String(12), db.ForeignKey('conductor.RUT'))
     direccion_origen = db.Column(db.String(255), nullable=False)
     direccion_destino = db.Column(db.String(255), nullable=False)
     # Relación con estado actual
