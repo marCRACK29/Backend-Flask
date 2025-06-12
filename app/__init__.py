@@ -40,9 +40,6 @@ def create_app():
     api.add_resource(EnviosClienteResource, '/api/envios/mis')
     api.add_resource(EnviosConductorResource, '/api/envios/conductor')
     api.add_resource(EnvioIndividualResource, '/api/envios/<int:envio_id>')
-    
-    from app.resources.ruta import RutaResource
-    api.add_resource(RutaResource, '/api/rutas')
 
     from app.resources.localizacion import LocalizacionResource, UltimaLocalizacionResource, HistorialLocalizacionResource
     api.add_resource(LocalizacionResource, '/api/localizacion')

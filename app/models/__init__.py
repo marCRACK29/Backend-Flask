@@ -1,4 +1,3 @@
-from .ruta import Ruta
 from .envio import Envio
 from .paquete import Paquete
 from .admin_conductor import AdminConductor
