@@ -15,7 +15,6 @@ def crear_envio(datos):
         nuevo_envio = Envio(
             receptor_id=datos.get('receptor_id'),
             remitente_id=datos.get('remitente_id'),
-            conductor_id=datos.get('conductor_id'),
             direccion_origen=datos.get('direccion_origen'),
             direccion_destino=datos.get('direccion_destino'),
             estado_id=estado_inicial.id

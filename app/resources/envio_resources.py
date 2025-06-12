@@ -7,7 +7,6 @@ class EnvioResource(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("remitente_id", type=str, required=True, help="remitente_id es requerido")
-        parser.add_argument("conductor_id", type=str, required=True, help="conductor_id es requerido")
         parser.add_argument("direccion_origen", type=str, required=True, help="direccion_origen es requerida")
         parser.add_argument("direccion_destino", type=str, required=True, help="direccion_destino es requerida")
         parser.add_argument("receptor_id", type=str, required=False, help="receptor_id es opcional")
@@ -21,7 +20,6 @@ class EnvioResource(Resource):
                     "id": envio.id,
                     "remitente_id": envio.remitente_id,
                     "receptor_id": envio.receptor_id,
-                    "conductor_id": envio.conductor_id,
                     "direccion_origen": envio.direccion_origen,
                     "direccion_destino": envio.direccion_destino,
                     "estado": envio.estado.to_dict() if envio.estado else None
